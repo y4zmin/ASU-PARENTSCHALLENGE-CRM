@@ -7,8 +7,7 @@ will be able to manage data, such as family records over the course of the organ
 records, update family profiles, and create reports without needing to know SQL to interact with the database in the backend.
 
 Techstack:
-HTML/CSS, Typescript
-Supabase 
+HTML/CSS, Typescript, Supabase 
 
 How to Run:
 npm run dev
