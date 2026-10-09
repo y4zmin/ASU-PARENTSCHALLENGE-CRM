@@ -7,6 +7,9 @@
     <title>Parents Challenge Portal</title>
     <link rel="stylesheet" href="src/style.css">
 </head>
+
+<script type="module" src="/src/main.ts"></script>
+
 <body>
     <main class="page">
         <section class="login-container">
@@ -21,13 +24,14 @@
 
             <form class="login-form">
                 <div class="form-group">
-                    <label for="username">Username</label>
+                    <label for="username">Email</label>
                     <input
-                        type="text"
+                        type="email"
                         id="username"
                         name="username"
-                        placeholder="Enter your username"
+                        placeholder="Enter your email"
                         autocomplete="username"
+                        required
                     >
                 </div>
 
@@ -39,6 +43,7 @@
                         name="password"
                         placeholder="Enter your password"
                         autocomplete="current-password"
+                        required
                     >
                     <a href="#" class="forgot-password">
                         Forgot Password
@@ -56,15 +61,17 @@
             </p>
         </section>
 
-        <footer class="footer"> <!--placeholder info-->
+                <footer class="footer"> <!--placeholder info-->
             Contact Us:
             <a href="mailto:info@parentschallenge.org">
                 info@parentschallenge.org
             </a>
             <span class="separator">|</span>
-            <a href="tel:5555555555">555-555-55</a> 
+            <a href="tel:5555555555">555-555-55</a>
         </footer>
     </main>
+
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
 
