@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,14 +35,17 @@
             <li><a href="#">My Family Profile</a></li>
             <li><a href="#">Scholars</a></li>
             <li><a href="#">Events</a></li>
-            <li><a href="#">Attendance</a></li>
+            <li><a href="#attendance" data-tab="attendance">Attendance</a></li> <!--opens attendance tab-->
             <li><a href="#">Documents</a></li>
             <li><a href="#">Resources</a></li>
         </ul>
     </nav>
 
+    <!--attendance tab-->
+    <section id="attendance-section" class="attendance" hidden></section>
+
     </main>
+
+    <script type="module" src="/src/attendance.ts"></script>
 </body>
 </html>
-
-

@@ -1,0 +1,29 @@
+/* Styles for the attendance tab.
+   I used the same colors as Yazmin's dashboard.css so it all matches. */
+
+/* Stacks everything in the tab with some space in between */
+.attendance {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Keeps the tab hidden until someone clicks Attendance */
+.attendance[hidden] {
+    display: none;
+}
+
+.attendance-title {
+    font-size: 20px;
+    color: #39445f;
+}
+
+.attendance-intro {
+    font-size: 15px;
+    color: #455674;
+}
+
+/* Underlines whichever tab is open in the nav bar */
+.nav-bar a.active {
+    text-decoration: underline;
+}
