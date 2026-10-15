@@ -1,29 +1,74 @@
-/* Styles for the attendance tab.
-   I used the same colors as Yazmin's dashboard.css so it all matches. */
-
-/* Stacks everything in the tab with some space in between */
+/* stacks everything in the attendance tab with space between */
 .attendance {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* Keeps the tab hidden until someone clicks Attendance */
+/* hides the tab until attendance is clicked */
 .attendance[hidden] {
     display: none;
 }
 
+/* attendance history title */
 .attendance-title {
     font-size: 20px;
     color: #39445f;
 }
 
+/* description under the title */
 .attendance-intro {
     font-size: 15px;
     color: #455674;
 }
 
-/* Underlines whichever tab is open in the nav bar */
+/* underlines attendance in the menu bar while the tab is open */
 .nav-bar a.active {
     text-decoration: underline;
+}
+
+/* border around the table; scrolls sideways on small screens */
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #c6d2c9;
+    border-radius: 8px;
+}
+
+/* table takes up the full width */
+.attendance-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+/* column titles; light green to match the menu bar at the top */
+.attendance-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 700;
+    background-color: #c6d2c9;
+}
+
+/* space inside each box and a thin line between rows */
+.attendance-table td {
+    padding: 12px 16px;
+    border-top: 1px solid #e3e9e5;
+    vertical-align: top;
+}
+
+/* every other row is light gray to make rows easier to read */
+.attendance-table tbody tr:nth-child(even) {
+    background-color: #f8faf9;
+}
+
+/* hours lined up on the right */
+.attendance-table th:last-child,
+.hours-cell {
+    text-align: right;
+}
+
+/* hours in bold */
+.hours-cell {
+    font-weight: 700;
 }
