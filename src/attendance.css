@@ -1,0 +1,151 @@
+/* stacks everything in the attendance tab with space between */
+.attendance {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* hides the tab until attendance is clicked */
+.attendance[hidden] {
+    display: none;
+}
+
+/* attendance history title */
+.attendance-title {
+    font-size: 20px;
+    color: #39445f;
+}
+
+/* description under the title */
+.attendance-intro {
+    font-size: 15px;
+    color: #455674;
+}
+
+/* underlines attendance in the menu bar while the tab is open */
+.nav-bar a.active {
+    text-decoration: underline;
+}
+
+/* border around the table; scrolls sideways on small screens */
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #c6d2c9;
+    border-radius: 8px;
+}
+
+/* table takes up the full width */
+.attendance-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+/* column titles; light green to match the menu bar at the top */
+.attendance-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 700;
+    background-color: #c6d2c9;
+}
+
+/* space inside each box and a thin line between rows */
+.attendance-table td {
+    padding: 12px 16px;
+    border-top: 1px solid #e3e9e5;
+    vertical-align: top;
+}
+
+/* every other row is light gray to make rows easier to read */
+.attendance-table tbody tr:nth-child(even) {
+    background-color: #f8faf9;
+}
+
+/* hours lined up on the right */
+.attendance-table th:last-child,
+.hours-cell {
+    text-align: right;
+}
+
+/* hours in bold */
+.hours-cell {
+    font-weight: 700;
+}
+
+/* box around the hours progress */
+.progress-section {
+    max-width: 520px;
+    padding: 20px 24px;
+    background-color: #f3f6f4;
+    border: 1px solid #c6d2c9;
+    border-radius: 8px;
+}
+
+/* "5 of 12 hours completed" text */
+.progress-text {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* empty bar in the background */
+.progress-bar {
+    height: 14px;
+    background-color: #ffffff;
+    border: 1px solid #c6d2c9;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+/* filled part of the bar; width is set in attendance.ts */
+.progress-fill {
+    height: 100%;
+    background-color: #394761;
+}
+
+/* bar turns green once all hours are done */
+.progress-fill.complete {
+    background-color: #4f8a5b;
+}
+
+/* message under the bar */
+.progress-message {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #455674;
+}
+
+/* small colored dot next to each session type */
+.type-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+}
+
+/* program year label and dropdown side by side */
+.year-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+}
+
+/* the dropdown box */
+.year-filter select {
+    padding: 8px 12px;
+    font-size: 15px;
+    color: #394761;
+    border: 1px solid #c6d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* space between the progress section and the table */
+#year-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
