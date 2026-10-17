@@ -91,6 +91,17 @@ const attendanceRecords: AttendanceRecord[] = [
     },
 ];
 
+//color for each session type
+const sessionTypeColors: Record<string, string> = {
+    'In-person': '#4A90D9',
+    'Lunch & Learn': '#F5A623',
+    'Virtual': '#7ED321',
+    'Community event': '#9013FE',
+    'Mandatory': '#D0021B',
+    'Platinum': '#8B8B8B',
+    'Other': '#4A4A4A',
+};
+
 //helper function for formatting date better
 function formatDate(date: string): string {
     const dateParts = date.split('-');
@@ -120,7 +131,10 @@ function buildTableRows(records: AttendanceRecord[]): string {
             <tr>
                 <td>${formatDate(record.sessionDate)}</td>
                 <td>${record.sessionTitle}</td>
-                <td>${record.sessionType}</td>
+                <td>
+                    <span class="type-dot" style="background-color: ${sessionTypeColors[record.sessionType]};"></span>
+                    ${record.sessionType}
+                </td>
                 <td>${record.attendees.join(', ')}</td>
                 <td class="hours-cell">${getHours(record)}</td>
             </tr>
@@ -131,7 +145,7 @@ function buildTableRows(records: AttendanceRecord[]): string {
 }
 
 //program year for now; switch to dropdown later
-const currentYear = '2025-2026';
+const currentYear = '2026-2027';
 
 //gets sessions from one program year 
 function getYearRecords(year: string): AttendanceRecord[] {

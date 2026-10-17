@@ -115,3 +115,12 @@
     font-size: 14px;
     color: #455674;
 }
+
+/* small colored dot next to each session type */
+.type-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+}
