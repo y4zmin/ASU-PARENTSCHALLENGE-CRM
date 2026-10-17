@@ -124,3 +124,28 @@
     margin-right: 8px;
     border-radius: 50%;
 }
+
+/* program year label and dropdown side by side */
+.year-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+}
+
+/* the dropdown box */
+.year-filter select {
+    padding: 8px 12px;
+    font-size: 15px;
+    color: #394761;
+    border: 1px solid #c6d2c9;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* space between the progress section and the table */
+#year-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}

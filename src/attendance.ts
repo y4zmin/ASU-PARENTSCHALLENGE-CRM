@@ -144,9 +144,6 @@ function buildTableRows(records: AttendanceRecord[]): string {
     return rows;
 }
 
-//program year for now; switch to dropdown later
-const currentYear = '2026-2027';
-
 //gets sessions from one program year 
 function getYearRecords(year: string): AttendanceRecord[] {
     
@@ -161,6 +158,38 @@ function getYearRecords(year: string): AttendanceRecord[] {
     }
 
     return yearRecords;
+}
+
+//gets every program year in the data; newest first
+function getProgramYears(): string[] { 
+
+    //empty list to hold the years
+    const years: string[] = [];
+
+    //go through every session
+    for(const record of attendanceRecords) {
+
+        //add the year only if not already in the list
+        if(!years.includes(record.programYear)) {
+            years.push(record.programYear);
+        }
+
+    }
+
+    return years;
+}
+
+//build one dropdown option for each program year
+function yearOptions(years: string[]): string {
+
+    let options = '';
+
+    //add option for each year
+    for(const year of years) {
+        options += '<option>' + year + '</option>';
+    }
+
+    return options;
 }
 
 //required hours of learning
@@ -207,7 +236,7 @@ function buildProgressSection(records: AttendanceRecord[]): string {
         message = hoursLeft + ' hours left to go';
     }
     else {
-        message = 'All ' + requiredHours + ' hours completed!'
+        message = 'All ' + requiredHours + ' hours completed!';
         barClass = 'progress-fill complete';
     }
 
@@ -241,10 +270,10 @@ function showAttendance(show: boolean): void {
     
 }
 
-//session from the year being shown
-const yearRecords = getYearRecords(currentYear);
+//every program year in the data 
+const programYears = getProgramYears();
 
-//title, description, hours progress, and sessions table inside attendance tab
+//title, description, year dropdown, and an empty spot for the year's progress and table
 section.innerHTML = `
     <h2 class="attendance-title">Attendance History</h2>
     <p class="attendance-intro">
@@ -252,25 +281,62 @@ section.innerHTML = `
         and your progress toward the required 12 hours of learning.
     </p>
 
-    ${buildProgressSection(yearRecords)}
-
-    <div class="table-wrapper">
-        <table class="attendance-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Session</th>
-                    <th>Type</th>
-                    <th>Who Attended</th>
-                    <th>Hours</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${buildTableRows(yearRecords)}
-            </tbody>
-        </table>
+    <div class="year-filter">
+        <label for="year-select">Program year</label>
+        <select id="year-select">
+            ${yearOptions(programYears)}
+        </select>
     </div>
+
+    <div id="year-content"></div>
 `;
+
+//shows hours progress and sessions table for one program year
+function showYear(year: string): void {
+
+    //empty spot under dropdown where year's info goes
+    const yearContent = document.querySelector<HTMLElement>('#year-content')!;
+
+    //sessions from that year
+    const yearRecords = getYearRecords(year);
+
+    //fill spot out with that year's progress & table
+    yearContent.innerHTML = `
+        ${buildProgressSection(yearRecords)}
+
+        <div class="table-wrapper">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Session</th>
+                        <th>Type</th>
+                        <th>Who Attended</th>
+                        <th>Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${buildTableRows(yearRecords)}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+//show newest year when page first loads
+showYear(programYears[0]);
+
+//program year dropdown
+const selectYear = document.querySelector<HTMLSelectElement>('#year-select')!;
+
+//runs when different year is picked
+function yearChange(): void {
+    showYear(selectYear.value);
+}
+
+//run the yearChange whenever dropdown changes
+selectYear.addEventListener('change', yearChange);
+
 
 //runs when nav link clicked
 //whatever link is clicked is set as event.currentTarget
