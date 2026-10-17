@@ -72,3 +72,46 @@
 .hours-cell {
     font-weight: 700;
 }
+
+/* box around the hours progress */
+.progress-section {
+    max-width: 520px;
+    padding: 20px 24px;
+    background-color: #f3f6f4;
+    border: 1px solid #c6d2c9;
+    border-radius: 8px;
+}
+
+/* "5 of 12 hours completed" text */
+.progress-text {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* empty bar in the background */
+.progress-bar {
+    height: 14px;
+    background-color: #ffffff;
+    border: 1px solid #c6d2c9;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+/* filled part of the bar; width is set in attendance.ts */
+.progress-fill {
+    height: 100%;
+    background-color: #394761;
+}
+
+/* bar turns green once all hours are done */
+.progress-fill.complete {
+    background-color: #4f8a5b;
+}
+
+/* message under the bar */
+.progress-message {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #455674;
+}

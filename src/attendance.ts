@@ -100,6 +100,7 @@ function formatDate(date: string): string {
 
 //how long a session was in hours
 function getHours(record: AttendanceRecord): number {
+    
     const start = record.startTime.split(':');
     const end = record.endTime.split(':');
 
@@ -111,6 +112,7 @@ function getHours(record: AttendanceRecord): number {
 
 //builds one table row for each session
 function buildTableRows(records: AttendanceRecord[]): string {
+    
     let rows = '';
 
     for (const record of records) {
@@ -126,6 +128,85 @@ function buildTableRows(records: AttendanceRecord[]): string {
     }
 
     return rows;
+}
+
+//program year for now; switch to dropdown later
+const currentYear = '2025-2026';
+
+//gets sessions from one program year 
+function getYearRecords(year: string): AttendanceRecord[] {
+    
+    //empty list to hold year's sessions
+    const yearRecords: AttendanceRecord[] = [];
+
+    //go thorugh every session
+    for(const record of attendanceRecords) {
+        if(record.programYear === year) {    //keep if it's from the year we want
+            yearRecords.push(record);
+        }
+    }
+
+    return yearRecords;
+}
+
+//required hours of learning
+const requiredHours = 12;
+
+//adds up hours from a list of sessions
+function getTotalHours(records: AttendanceRecord[]): number {
+
+    //start at 0 hrs
+    let totalHours = 0;
+
+    //going through each session
+    for(const record of records) {
+
+        //add the session's hours to the total
+        totalHours += getHours(record);
+    }
+
+    return totalHours;
+}
+
+//build hours progress section
+function buildProgressSection(records: AttendanceRecord[]): string {
+
+    //total hrs from these sessions
+    const totalHours = getTotalHours(records);
+
+    //how many hrs are needed ? 
+    const hoursLeft = requiredHours - totalHours;
+
+    //how full bar is in percent
+    let percent = (totalHours / requiredHours) * 100;
+
+    //bar can't go more than 100%
+    if(percent > 100) {
+        percent = 100;
+    }
+
+    //color coordinate the bar and message depending on if required hrs met
+    let message = '';
+    let barClass = 'progress-fill';
+
+    if(hoursLeft > 0) {
+        message = hoursLeft + ' hours left to go';
+    }
+    else {
+        message = 'All ' + requiredHours + ' hours completed!'
+        barClass = 'progress-fill complete';
+    }
+
+    //progress seciton html
+    return `
+        <div class="progress-section">
+            <p class="progress-text">${totalHours} of ${requiredHours} hours completed</p>
+            <div class="progress-bar">
+                <div class="${barClass}" style="width: ${percent}%;"></div>
+            </div>
+            <p class="progress-message">${message}</p>
+        </div>
+    `;
 }
 
 //open closing the attendance tab
@@ -146,13 +227,18 @@ function showAttendance(show: boolean): void {
     
 }
 
-//title, description, and sessions table inside attendance tab
+//session from the year being shown
+const yearRecords = getYearRecords(currentYear);
+
+//title, description, hours progress, and sessions table inside attendance tab
 section.innerHTML = `
     <h2 class="attendance-title">Attendance History</h2>
     <p class="attendance-intro">
         Track the sessions you and your family have attended
         and your progress toward the required 12 hours of learning.
     </p>
+
+    ${buildProgressSection(yearRecords)}
 
     <div class="table-wrapper">
         <table class="attendance-table">
@@ -166,7 +252,7 @@ section.innerHTML = `
                 </tr>
             </thead>
             <tbody>
-                ${buildTableRows(attendanceRecords)}
+                ${buildTableRows(yearRecords)}
             </tbody>
         </table>
     </div>
