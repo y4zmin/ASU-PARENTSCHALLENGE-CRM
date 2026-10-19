@@ -1,0 +1,20 @@
+.attendance-search-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+}
+
+#attendance-search {
+  width: min(300px, 100%);
+  padding: 10px 12px;
+  border: 1px solid #c6d2c9;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #394761;
+  background-color: #fff;
+}
+
+#attendance-search:focus {
+  outline: 2px solid #394761;
+  outline-offset: 2px;
+}
