@@ -1,0 +1,150 @@
+:root {
+  --pc-navy: #394665;
+  --pc-sage: #c5d2c8;
+  --pc-teal: #559db0;
+  --pc-white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.invitation-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: 48px 20px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: var(--pc-white);
+  color: var(--pc-navy);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.invitation-panel {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.invitation-logo {
+  display: block;
+  width: min(100%, 270px);
+  height: auto;
+  object-fit: contain;
+  margin: 18px 0 23px;
+}
+
+.invitation-panel h1 {
+  max-width: 100%;
+  margin: 0 0 19px;
+  color: var(--pc-navy);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.invitation-form {
+  width: 200px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.invitation-form label {
+  margin-bottom: 5px;
+  color: var(--pc-navy);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.invitation-form input {
+  width: 100%;
+  min-height: 26px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  outline: none;
+  background: var(--pc-sage);
+  color: var(--pc-navy);
+  font: inherit;
+  font-size: 10px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.invitation-form input::placeholder {
+  color: #536078;
+  opacity: 1;
+}
+
+.invitation-form input:focus-visible {
+  border-color: var(--pc-teal);
+  box-shadow: 0 0 0 3px rgb(85 157 176 / 22%);
+}
+
+.invitation-form button {
+  align-self: center;
+  width: 90px;
+  min-height: 29px;
+  margin-top: 19px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--pc-teal);
+  color: var(--pc-white);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.invitation-form button:hover {
+  background: #43889b;
+}
+
+.invitation-form button:active {
+  transform: translateY(1px);
+}
+
+.invitation-form button:focus-visible,
+.back-to-sign-in:focus-visible {
+  outline: 3px solid rgb(85 157 176 / 45%);
+  outline-offset: 3px;
+}
+
+.invitation-message {
+  margin: 10px 0 0;
+  color: var(--pc-navy);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.back-to-sign-in {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 28px;
+  color: var(--pc-navy);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.back-arrow {
+  font-size: 29px;
+  font-weight: 400;
+  line-height: 0.8;
+  text-decoration: none;
+}
+
+
