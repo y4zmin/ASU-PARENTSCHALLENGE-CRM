@@ -28,7 +28,7 @@ form.addEventListener('submit', async (event) => {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('role')
+    .select('active_role')
     .eq('id', data.user.id)
     .single()
 
@@ -38,11 +38,11 @@ form.addEventListener('submit', async (event) => {
   }
 
   console.log('Login successful')
-  console.log('Role:', profile.role)
+  console.log('Role:', profile.active_role)
 
-  if (profile.role === 'admin') {
+  if (profile.active_role === 'admin') {
     window.location.href = '/parent-dashboard.html'
-  } else if (profile.role === 'staff') {
+  } else if (profile.active_role === 'staff') {
     window.location.href = '/parent-dashboard.html'
   } else {
     window.location.href = '/parent-dashboard.html'
