@@ -14,7 +14,7 @@ async function loadDashboardUser() {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('first_name, last_name, role')
+    .select('first_name, last_name, active_role')
     .eq('id', user.id)
     .single()
 
