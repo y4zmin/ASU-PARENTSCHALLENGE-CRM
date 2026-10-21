@@ -10,4 +10,5 @@ Techstack:
 HTML/CSS, Typescript, Supabase PostgreSQL
 
 How to Run:
+Supabase installation package: npm install @supabase/server
 npm run dev
