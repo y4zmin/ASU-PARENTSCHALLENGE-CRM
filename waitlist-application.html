@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Parents Challenge Portal</title>
+     <link rel="stylesheet" href="src/waitlist.css">
+</head>
+<body>
+    <div class="page">
+        <header class="site-header">
+            <a href="/" aria-label="Parents Challenge home">
+                <img
+                    class="logo"
+                    src="/src/assets/parents-challenge-logo.jpg"
+                    alt="Parents Challenge Colorado"
+                >
+            </a>
+        </header>
+
+        <main class="application-container">
+            <p class="eyebrow">PARENTS CHALLENGE WAITLIST</p>
+            <h1>Family Application</h1>
+            <p class="intro">
+                Fill out the following information to submit an application for our waitlist to join the program. Required fields are marked with an asterisk (*).
+            </p>
+
+            <form id="application-form" novalidate>
+                <!--family info-->
+                <section class="form-section">
+                    <h2>1. Family Information</h2>
+
+                    <div class="grid">
+                        <div class="field">
+                            <label for="family_name">Family name *</label>
+                            <input id="family_name" name="family_name" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="program_year_id">Program Year</label>
+                            <input
+                                id="program_year_id"
+                                name="program_year_id"
+                                type="number"
+                                min="2027"
+                                step="1"
+                                required
+                            >
+                        </div>
+
+                        <div class="field wide">
+                            <label for="address_line1">Street Address</label>
+                            <input id="address_line1" name="address_line1"
+                                   autocomplete="address-line1">
+                        </div>
+
+                        <div class="field wide">
+                            <label for="address_line2">Apartment, unit, etc.</label>
+                            <input id="address_line2" name="address_line2"
+                                   autocomplete="address-line2">
+                        </div>
+
+                        <div class="field">
+                            <label for="city">City</label>
+                            <input id="city" name="city" autocomplete="address-level2">
+                        </div>
+
+                        <div class="field">
+                            <label for="state">State</label>
+                            <input id="state" name="state" maxlength="2"
+                                   placeholder="e.g. CO">
+                        </div>
+
+                        <div class="field">
+                            <label for="zip_code">ZIP code</label>
+                            <input id="zip_code" name="zip_code"
+                                   autocomplete="postal-code">
+                        </div>
+
+                        <div class="field">
+                            <label for="county">County</label>
+                            <select id="county" name="county">
+                                <option value="">Select county</option>
+                                <option>El Paso / Pikes Peak Region</option>
+                                <option>Eastern El Paso County</option>
+                                <option>Pueblo</option>
+                                <option>Teller</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="primary_phone">Primary Phone Number</label>
+                            <input id="primary_phone" name="primary_phone"
+                                   type="tel" autocomplete="tel">
+                        </div>
+
+                        <div class="field">
+                            <label for="primary_email">Primary Email *</label>
+                            <input id="primary_email" name="primary_email"
+                                   type="email" required autocomplete="email">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: PARENTS AND GUARDIANS -->
+                <section class="form-section">
+                    <h2>2. Parent/Guardian Information</h2>
+                    <p>At least one parent or legal guardian is required.</p>
+
+        <div id="parents-list" class="repeat-list">
+        <fieldset class="repeat-card">
+            <legend>Parent/Guardian 1 *</legend>
+
+            <div class="grid">
+                <div class="field">
+                    <label>First name *</label>
+                    <input data-field="first_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Last name *</label>
+                    <input data-field="last_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Email</label>
+                    <input data-field="email" type="email">
+                </div>
+
+                <div class="field">
+                    <label>Phone Number</label>
+                    <input data-field="phone" type="tel">
+                </div>
+
+                <div class="field">
+                    <label>Relationship to Scholar</label>
+                    <select data-field="relationship_to_scholar">
+                        <option value="">Select relationship</option>
+                        <option>Mom</option>
+                        <option>Dad</option>
+                        <option>Grandparent</option>
+                        <option>Legal Guardian</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Preferred Language</label>
+                    <select data-field="preferred_language">
+                        <option value="">Select language</option>
+                        <option>English</option>
+                        <option>Spanish</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Race/Ethnicity</label>
+                    <select data-field="ethnicity">
+                        <option value="">Select</option>
+                        <option>Black/African-American</option>
+                        <option>Asian/Pacific Islander</option>
+                        <option>Caucasian/White</option>
+                        <option>Hispanic/Latino</option>
+                        <option>Native American/Alaskan Native</option>
+                        <option>Multiracial</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Education Level</label>
+                    <select data-field="education_level">
+                        <option value="">Select</option>
+                        <option>Less than high school</option>
+                        <option>High school diploma / GED</option>
+                        <option>Some college</option>
+                        <option>Associate degree</option>
+                        <option>Bachelor's degree</option>
+                        <option>Graduate degree</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field wide">
+                    <label>Employer</label>
+                    <input data-field="employer">
+                </div>
+
+                <label class="check wide">
+                    <input data-field="is_primary" type="checkbox" checked>
+                    Primary contact for this application
+                </label>
+                </div>
+            </fieldset>
+
+              <fieldset class="repeat-card">
+            <legend>Parent/Guardian 2</legend>
+
+            <div class="grid">
+                <div class="field">
+                    <label>First name *</label>
+                    <input data-field="first_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Last name *</label>
+                    <input data-field="last_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Email</label>
+                    <input data-field="email" type="email">
+                </div>
+
+                <div class="field">
+                    <label>Phone Number</label>
+                    <input data-field="phone" type="tel">
+                </div>
+
+                <div class="field">
+                    <label>Relationship to Scholar</label>
+                    <select data-field="relationship_to_scholar">
+                        <option value="">Select relationship</option>
+                        <option>Mom</option>
+                        <option>Dad</option>
+                        <option>Grandparent</option>
+                        <option>Legal Guardian</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Preferred Language</label>
+                    <select data-field="preferred_language">
+                        <option value="">Select language</option>
+                        <option>English</option>
+                        <option>Spanish</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Race/Ethnicity</label>
+                    <select data-field="ethnicity">
+                        <option value="">Select</option>
+                        <option>Black/African-American</option>
+                        <option>Asian/Pacific Islander</option>
+                        <option>Caucasian/White</option>
+                        <option>Hispanic/Latino</option>
+                        <option>Native American/Alaskan Native</option>
+                        <option>Multiracial</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Education Level</label>
+                    <select data-field="education_level">
+                        <option value="">Select</option>
+                        <option>Less than high school</option>
+                        <option>High school diploma / GED</option>
+                        <option>Some college</option>
+                        <option>Associate degree</option>
+                        <option>Bachelor's degree</option>
+                        <option>Graduate degree</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="field wide">
+                    <label>Employer</label>
+                    <input data-field="employer">
+                </div>
+
+                <label class="check wide">
+                    <input data-field="is_primary" type="checkbox" checked>
+                    Primary contact for this application
+                </label>
+                </div>
+            </fieldset>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: SCHOLARS -->
+                <section class="form-section">
+                    <h2>3. Scholar information</h2>
+                    <p>
+                        At least one scholar is required, with a maximum of two scholars per family. 
+                    </p>
+
+                    <div id="scholars-list" class="repeat-list">
+            <fieldset class="repeat-card">
+            <legend>Scholar 1*</legend>
+            <div class="grid">
+                <div class="field">
+                    <label>First name *</label>
+                    <input data-field="first_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Last name *</label>
+                    <input data-field="last_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Date of Birth</label>
+                    <input data-field="date_of_birth" type="date">
+                </div>
+
+                <div class="field">
+                    <label>Grade Level</label>
+                    <select data-field="grade_level">
+                        <option value="">Select Grade</option>
+                        <option>Preschool</option>
+                        <option>Pre-K</option>
+                        <option>Kindergarten</option>
+                        <option>1st grade</option>
+                        <option>2nd grade</option>
+                        <option>3rd grade</option>
+                        <option>4th grade</option>
+                        <option>5th grade</option>
+                        <option>6th grade</option>
+                        <option>7th grade</option>
+                        <option>8th grade</option>
+                        <option>9th grade</option>
+                        <option>10th grade</option>
+                        <option>11th grade</option>
+                        <option>12th grade</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>School Type</label>
+                    <select data-field="school_type">
+                        <option value="">Select type</option>
+                        <option>Private</option>
+                        <option>Public</option>
+                        <option>Charter</option>
+                        <option>Homeschool</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>School Name</label>
+                    <input data-field="school_name">
+                </div>
+
+                <div class="field">
+                    <label>Race/Ethnicity</label>
+                    <select data-field="ethnicity">
+                        <option value="">Select</option>
+                        <option>Black / African-American</option>
+                        <option>Asian / Pacific Islander</option>
+                        <option>Caucasian / White</option>
+                        <option>Hispanic / Latino</option>
+                        <option>Native American / Alaskan Native</option>
+                        <option>Multiracial</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <label class="check">
+                    <input data-field="applying_for_scholarship" type="checkbox">
+                    Applying for scholarship
+                </label>
+
+                <label class="check">
+                    <input data-field="applying_for_grant" type="checkbox">
+                    Applying for grant
+                </label>
+            </div>
+        </fieldset>
+         <fieldset class="repeat-card">
+            <legend>Scholar 2</legend>
+            <div class="grid">
+                <div class="field">
+                    <label>First name *</label>
+                    <input data-field="first_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Last name *</label>
+                    <input data-field="last_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Date of Birth</label>
+                    <input data-field="date_of_birth" type="date">
+                </div>
+
+                <div class="field">
+                    <label>Grade Level</label>
+                    <select data-field="grade_level">
+                        <option value="">Select Grade</option>
+                        <option>Preschool</option>
+                        <option>Pre-K</option>
+                        <option>Kindergarten</option>
+                        <option>1st grade</option>
+                        <option>2nd grade</option>
+                        <option>3rd grade</option>
+                        <option>4th grade</option>
+                        <option>5th grade</option>
+                        <option>6th grade</option>
+                        <option>7th grade</option>
+                        <option>8th grade</option>
+                        <option>9th grade</option>
+                        <option>10th grade</option>
+                        <option>11th grade</option>
+                        <option>12th grade</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>School Type</label>
+                    <select data-field="school_type">
+                        <option value="">Select type</option>
+                        <option>Private</option>
+                        <option>Public</option>
+                        <option>Charter</option>
+                        <option>Homeschool</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>School Name</label>
+                    <input data-field="school_name">
+                </div>
+
+                <div class="field">
+                    <label>Race/Ethnicity</label>
+                    <select data-field="ethnicity">
+                        <option value="">Select</option>
+                        <option>Black / African-American</option>
+                        <option>Asian / Pacific Islander</option>
+                        <option>Caucasian / White</option>
+                        <option>Hispanic / Latino</option>
+                        <option>Native American / Alaskan Native</option>
+                        <option>Multiracial</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <label class="check">
+                    <input data-field="applying_for_scholarship" type="checkbox">
+                    Applying for scholarship
+                </label>
+
+                <label class="check">
+                    <input data-field="applying_for_grant" type="checkbox">
+                    Applying for grant
+                </label>
+            </div>
+        </fieldset>
+                    </div>
+                </section>
+
+                <div id="form-message" role="status" aria-live="polite"></div>
+
+                <div class="actions">
+                    <a href="/">← Back to Sign In</a>
+                    <button id="submit-button" class="submit" type="submit">
+                        Submit Application
+                    </button>
+                </div>
+
+                <p class="privacy">
+                    Submitting this form sends your application to
+                    Parents Challenge for review.
+                </p>
+            </form>
+        </main>
+
+        <footer>
+            Contact Us:
+            <a href="mailto:info@parentschallenge.org">
+                info@parentschallenge.org
+            </a>
+        </footer>
+    </div>
+
+
+    <!--scholar form-->
+    <template id="scholar-template">
+        <fieldset class="repeat-card">
+            <legend>Scholar</legend>
+            <button type="button" class="remove">Remove</button>
+
+            <div class="grid">
+                <div class="field">
+                    <label>First name *</label>
+                    <input data-field="first_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Last name *</label>
+                    <input data-field="last_name" required>
+                </div>
+
+                <div class="field">
+                    <label>Date of birth</label>
+                    <input data-field="date_of_birth" type="date">
+                </div>
+
+                <div class="field">
+                    <label>Grade level</label>
+                    <select data-field="grade_level">
+                        <option value="">Select grade</option>
+                        <option>Preschool</option>
+                        <option>Pre-K</option>
+                        <option>Kindergarten</option>
+                        <option>1st grade</option>
+                        <option>2nd grade</option>
+                        <option>3rd grade</option>
+                        <option>4th grade</option>
+                        <option>5th grade</option>
+                        <option>6th grade</option>
+                        <option>7th grade</option>
+                        <option>8th grade</option>
+                        <option>9th grade</option>
+                        <option>10th grade</option>
+                        <option>11th grade</option>
+                        <option>12th grade</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>School type</label>
+                    <select data-field="school_type">
+                        <option value="">Select type</option>
+                        <option>Private</option>
+                        <option>Public</option>
+                        <option>Charter</option>
+                        <option>Homeschool</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>School name</label>
+                    <input data-field="school_name">
+                </div>
+
+                <div class="field">
+                    <label>Race / ethnicity</label>
+                    <select data-field="ethnicity">
+                        <option value="">Select</option>
+                        <option>Black / African-American</option>
+                        <option>Asian / Pacific Islander</option>
+                        <option>Caucasian / White</option>
+                        <option>Hispanic / Latino</option>
+                        <option>Native American / Alaskan Native</option>
+                        <option>Multiracial</option>
+                        <option>Other</option>
+                        <option>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <label class="check">
+                    <input data-field="applying_for_scholarship" type="checkbox">
+                    Applying for scholarship
+                </label>
+
+                <label class="check">
+                    <input data-field="applying_for_grant" type="checkbox">
+                    Applying for grant
+                </label>
+            </div>
+        </fieldset>
+    </template>
+
+   <!--- <script type="module" src="/src/application-form.ts"></script> -->
+</body>
+</html>
+
+
