@@ -193,3 +193,23 @@
   border-radius: 999px;
   vertical-align: middle;
 }
+
+/* year dropdown and search box side by side */
+.attendance-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* wide enough that the full placeholder text shows */
+.attendance-toolbar #attendance-search {
+  width: 225px;
+}
+
+/* "Showing 1 of 3 sessions 1 hour" line while searching */
+.search-results {
+  font-size: 14px;
+  color: #455674;
+}

@@ -275,6 +275,7 @@ section.innerHTML = `
     and your progress toward the required 12 hours of learning.
   </p>
 
+  <div class="attendance-toolbar">
   <div class="year-filter">
     <label for="year-select">Program year</label>
     <select id="year-select">
@@ -290,8 +291,9 @@ section.innerHTML = `
       aria-label="Search attendance records"
     />
   </div>
+</div>
 
-  <div id="year-content"></div>
+<div id="year-content"></div>
 `
 
 // shows hours progress and sessions table for one program year
@@ -304,8 +306,23 @@ function showYear(year: string): void {
 
   const rows = buildTableRows(filteredRecords)
 
+  let resultsLine = ''
+  if (query) {
+    const matchedHours = getTotalHours(filteredRecords)
+
+    let hourWord = 'hours'
+    if (matchedHours === 1) {
+      hourWord = 'hour'
+    }
+
+    resultsLine = '<p class="search-results">Showing ' + filteredRecords.length + ' of ' + yearRecords.length +
+      ' sessions · ' + matchedHours + ' ' + hourWord + '</p>'
+
+  }
+
   yearContent.innerHTML = `
-    ${buildProgressSection(filteredRecords)}
+    ${buildProgressSection(yearRecords)}
+    ${resultsLine}
 
     <div class="table-wrapper">
       <table class="attendance-table">
