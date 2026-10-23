@@ -28,7 +28,7 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2026-2027',
     sessionTitle: 'Session 1',
-    sessionType: 'Lunch & Learn',
+    sessionType: 'Lunch and Learn',
     sessionDate: '2026-10-06',
     startTime: '12:00',
     endTime: '13:00',
@@ -37,7 +37,7 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2026-2027',
     sessionTitle: 'Session 2',
-    sessionType: 'In-person',
+    sessionType: 'Owning Your Life',
     sessionDate: '2026-09-22',
     startTime: '18:00',
     endTime: '20:00',
@@ -46,8 +46,8 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2026-2027',
     sessionTitle: 'Session 3',
-    sessionType: 'Mandatory',
-    sessionDate: '2026-08-25',
+    sessionType: 'In-Person',
+    sessionDate: '2026-07-27',
     startTime: '17:00',
     endTime: '19:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
@@ -55,7 +55,7 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 4',
-    sessionType: 'In-person',
+    sessionType: 'Nurturing Fathers',
     sessionDate: '2026-04-14',
     startTime: '18:00',
     endTime: '21:00',
@@ -64,7 +64,7 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 5',
-    sessionType: 'Community event',
+    sessionType: 'Platinum/Volunteer',
     sessionDate: '2026-03-21',
     startTime: '11:00',
     endTime: '14:00',
@@ -73,7 +73,7 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 6',
-    sessionType: 'In-person',
+    sessionType: 'Evening Virtual',
     sessionDate: '2025-11-18',
     startTime: '18:00',
     endTime: '21:00',
@@ -82,7 +82,7 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 7',
-    sessionType: 'Mandatory',
+    sessionType: 'In-Person',
     sessionDate: '2025-08-26',
     startTime: '17:00',
     endTime: '20:00',
@@ -92,13 +92,12 @@ const attendanceRecords: AttendanceRecord[] = [
 
 // color for each session type
 const sessionTypeColors: Record<string, string> = {
-  'In-person': '#4A90D9',
-  'Lunch & Learn': '#F5A623',
-  'Virtual': '#7ED321',
-  'Community event': '#9013FE',
-  'Mandatory': '#D0021B',
-  'Platinum': '#8B8B8B',
-  'Other': '#4A4A4A',
+     'In-Person': '#0070C0',
+     'Evening Virtual': '#FFC000',
+     'Lunch and Learn': '#7030A0',
+     'Platinum/Volunteer': '#00B050',
+     'Nurturing Fathers': '#FF0000',
+     'Owning Your Life': '#C00000',
 }
 
 // helper function for formatting date better
