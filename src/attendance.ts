@@ -21,6 +21,7 @@ interface AttendanceRecord {
   startTime: string
   endTime: string
   attendees: string[]
+  mandatory: boolean
 }
 
 // sample data for now, will come from supabase later
@@ -28,77 +29,83 @@ const attendanceRecords: AttendanceRecord[] = [
   {
     programYear: '2026-2027',
     sessionTitle: 'Session 1',
-    sessionType: 'Lunch & Learn',
+    sessionType: 'Lunch and Learn',
     sessionDate: '2026-10-06',
     startTime: '12:00',
     endTime: '13:00',
     attendees: ['Vanessa Aniston (Parent)', 'Jake Aniston (Scholar)'],
+    mandatory: false,
   },
   {
     programYear: '2026-2027',
     sessionTitle: 'Session 2',
-    sessionType: 'In-person',
+    sessionType: 'Owning Your Life',
     sessionDate: '2026-09-22',
     startTime: '18:00',
     endTime: '20:00',
     attendees: ['Vanessa Aniston (Parent)', 'Maria Lopez (Guest)'],
+    mandatory: false,
   },
   {
     programYear: '2026-2027',
     sessionTitle: 'Session 3',
-    sessionType: 'Mandatory',
-    sessionDate: '2026-08-25',
+    sessionType: 'In-Person',
+    sessionDate: '2026-07-27',
     startTime: '17:00',
     endTime: '19:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
+    mandatory: true,
   },
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 4',
-    sessionType: 'In-person',
+    sessionType: 'Nurturing Fathers',
     sessionDate: '2026-04-14',
     startTime: '18:00',
     endTime: '21:00',
     attendees: ['Vanessa Aniston (Parent)', 'Jake Aniston (Scholar)'],
+    mandatory: false,
   },
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 5',
-    sessionType: 'Community event',
+    sessionType: 'Platinum/Volunteer',
     sessionDate: '2026-03-21',
     startTime: '11:00',
     endTime: '14:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
+    mandatory: false,
   },
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 6',
-    sessionType: 'In-person',
+    sessionType: 'Evening Virtual',
     sessionDate: '2025-11-18',
     startTime: '18:00',
     endTime: '21:00',
     attendees: ['Vanessa Aniston (Parent)'],
+    mandatory: false,
   },
   {
     programYear: '2025-2026',
     sessionTitle: 'Session 7',
-    sessionType: 'Mandatory',
+    sessionType: 'In-Person',
     sessionDate: '2025-08-26',
     startTime: '17:00',
     endTime: '20:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)'],
+    mandatory: true,
   },
 ]
 
 // color for each session type
 const sessionTypeColors: Record<string, string> = {
-  'In-person': '#4A90D9',
-  'Lunch & Learn': '#F5A623',
-  'Virtual': '#7ED321',
-  'Community event': '#9013FE',
-  'Mandatory': '#D0021B',
-  'Platinum': '#8B8B8B',
-  'Other': '#4A4A4A',
+     'In-Person': '#0070C0',
+     'Evening Virtual': '#FFC000',
+     'Lunch and Learn': '#7030A0',
+     'Platinum/Volunteer': '#00B050',
+     'Nurturing Fathers': '#FF0000',
+     'Owning Your Life': '#C00000',
 }
 
 // helper function for formatting date better
@@ -124,6 +131,10 @@ function buildTableRows(records: AttendanceRecord[]): string {
   let rows = ''
 
   for (const record of records) {
+    let mandatoryTag = ''
+    if (record.mandatory) {
+      mandatoryTag = '<span class="mandatory-tag">Mandatory</span>'
+    }
     rows += `
       <tr>
         <td>${formatDate(record.sessionDate)}</td>
@@ -131,6 +142,7 @@ function buildTableRows(records: AttendanceRecord[]): string {
         <td>
           <span class="type-dot" style="background-color: ${sessionTypeColors[record.sessionType]};"></span>
           ${record.sessionType}
+          ${mandatoryTag}
         </td>
         <td>${record.attendees.join(', ')}</td>
         <td class="hours-cell">${getHours(record)}</td>
@@ -263,6 +275,7 @@ section.innerHTML = `
     and your progress toward the required 12 hours of learning.
   </p>
 
+  <div class="attendance-toolbar">
   <div class="year-filter">
     <label for="year-select">Program year</label>
     <select id="year-select">
@@ -278,8 +291,9 @@ section.innerHTML = `
       aria-label="Search attendance records"
     />
   </div>
+</div>
 
-  <div id="year-content"></div>
+<div id="year-content"></div>
 `
 
 // shows hours progress and sessions table for one program year
@@ -292,8 +306,23 @@ function showYear(year: string): void {
 
   const rows = buildTableRows(filteredRecords)
 
+  let resultsLine = ''
+  if (query) {
+    const matchedHours = getTotalHours(filteredRecords)
+
+    let hourWord = 'hours'
+    if (matchedHours === 1) {
+      hourWord = 'hour'
+    }
+
+    resultsLine = '<p class="search-results">Showing ' + filteredRecords.length + ' of ' + yearRecords.length +
+      ' sessions · ' + matchedHours + ' ' + hourWord + '</p>'
+
+  }
+
   yearContent.innerHTML = `
-    ${buildProgressSection(filteredRecords)}
+    ${buildProgressSection(yearRecords)}
+    ${resultsLine}
 
     <div class="table-wrapper">
       <table class="attendance-table">
