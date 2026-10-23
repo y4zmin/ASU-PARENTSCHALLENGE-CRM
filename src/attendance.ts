@@ -21,6 +21,7 @@ interface AttendanceRecord {
   startTime: string
   endTime: string
   attendees: string[]
+  mandatory: boolean
 }
 
 // sample data for now, will come from supabase later
@@ -33,6 +34,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '12:00',
     endTime: '13:00',
     attendees: ['Vanessa Aniston (Parent)', 'Jake Aniston (Scholar)'],
+    mandatory: false,
   },
   {
     programYear: '2026-2027',
@@ -42,6 +44,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '18:00',
     endTime: '20:00',
     attendees: ['Vanessa Aniston (Parent)', 'Maria Lopez (Guest)'],
+    mandatory: false,
   },
   {
     programYear: '2026-2027',
@@ -51,6 +54,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '17:00',
     endTime: '19:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
+    mandatory: true,
   },
   {
     programYear: '2025-2026',
@@ -60,6 +64,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '18:00',
     endTime: '21:00',
     attendees: ['Vanessa Aniston (Parent)', 'Jake Aniston (Scholar)'],
+    mandatory: false,
   },
   {
     programYear: '2025-2026',
@@ -69,6 +74,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '11:00',
     endTime: '14:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
+    mandatory: false,
   },
   {
     programYear: '2025-2026',
@@ -78,6 +84,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '18:00',
     endTime: '21:00',
     attendees: ['Vanessa Aniston (Parent)'],
+    mandatory: false,
   },
   {
     programYear: '2025-2026',
@@ -87,6 +94,7 @@ const attendanceRecords: AttendanceRecord[] = [
     startTime: '17:00',
     endTime: '20:00',
     attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)'],
+    mandatory: true,
   },
 ]
 
@@ -123,6 +131,10 @@ function buildTableRows(records: AttendanceRecord[]): string {
   let rows = ''
 
   for (const record of records) {
+    let mandatoryTag = ''
+    if (record.mandatory) {
+      mandatoryTag = '<span class="mandatory-tag">Mandatory</span>'
+    }
     rows += `
       <tr>
         <td>${formatDate(record.sessionDate)}</td>
@@ -130,6 +142,7 @@ function buildTableRows(records: AttendanceRecord[]): string {
         <td>
           <span class="type-dot" style="background-color: ${sessionTypeColors[record.sessionType]};"></span>
           ${record.sessionType}
+          ${mandatoryTag}
         </td>
         <td>${record.attendees.join(', ')}</td>
         <td class="hours-cell">${getHours(record)}</td>
