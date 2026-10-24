@@ -275,25 +275,25 @@ section.innerHTML = `
     and your progress toward the required 12 hours of learning.
   </p>
 
-  <div class="attendance-toolbar">
-  <div class="year-filter">
-    <label for="year-select">Program year</label>
-    <select id="year-select">
-      ${yearOptions(programYears)}
-    </select>
+ <div class="attendance-toolbar">
+    <div class="year-filter">
+      <label for="year-select">Program year</label>
+      <select id="year-select">
+        ${yearOptions(programYears)}
+      </select>
+    </div>
+
+    <div class="attendance-controls">
+      <label for="attendance-search">Search attendance records</label>
+      <input
+        id="attendance-search"
+        type="search"
+        placeholder="Search sessions or attendees"
+      />
+    </div>
   </div>
 
-  <div class="attendance-controls">
-    <input
-      id="attendance-search"
-      type="search"
-      placeholder="Search sessions or attendees"
-      aria-label="Search attendance records"
-    />
-  </div>
-</div>
-
-<div id="year-content"></div>
+  <div id="year-content"></div>
 `
 
 // shows hours progress and sessions table for one program year

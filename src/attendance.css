@@ -30,8 +30,20 @@
 /* search box and year filter area */
 .attendance-controls {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   margin-top: -4px;
+}
+
+.attendance-controls label {
+  display: block;
+  width: min(300px, 100%);
+  box-sizing: border-box;
+  padding-left: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #39445f;
 }
 
 .attendance-controls input {
@@ -39,7 +51,7 @@
   padding: 10px 12px;
   border: 1px solid #c6d2c9;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   color: #394761;
   background-color: #fff;
 }
@@ -213,3 +225,4 @@
   font-size: 14px;
   color: #455674;
 }
+
