@@ -176,7 +176,7 @@ async function loadAttendance(): Promise<AttendanceRecord[] | null> {
   }
 
   const records: AttendanceRecord[] = []
-  // supabase guesses the wrong shape here, so we tell typescript what it really is
+  
   for (const row of data as unknown as AttendanceRow[]) {
     const record = toAttendanceRecord(row)
     if (record) {
