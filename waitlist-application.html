@@ -36,7 +36,7 @@
                             <input id="family_name" name="family_name" required>
                         </div>
 
-                        <div class="field">
+                      <!--  <div class="field">
                             <label for="program_year_id">Program Year</label>
                             <input
                                 id="program_year_id"
@@ -46,7 +46,7 @@
                                 step="1"
                                 required
                             >
-                        </div>
+                        </div>-->
 
                         <div class="field wide">
                             <label for="address_line1">Street Address</label>
@@ -67,8 +67,9 @@
 
                         <div class="field">
                             <label for="state">State</label>
-                            <input id="state" name="state" maxlength="2"
-                                   placeholder="e.g. CO">
+                            <select id="state" name="state" required>
+                                <option value="">Select state</option>
+                            </select>
                         </div>
 
                         <div class="field">
@@ -189,10 +190,16 @@
                     <input data-field="employer">
                 </div>
 
-                <label class="check wide">
+               <!-- <label class="check wide">
                     <input data-field="is_primary" type="checkbox" checked>
                     Primary contact for this application
+                </label>-->
+                <label class="check wide">
+                    <input type="radio" name="primary_contact" value="parent1" checked>
+                    Primary Contact
                 </label>
+
+                
                 </div>
             </fieldset>
 
@@ -277,10 +284,10 @@
                 </div>
 
                 <label class="check wide">
-                    <input data-field="is_primary" type="checkbox" checked>
-                    Primary contact for this application
+                    <input type="radio" name="primary_contact" value="parent1" checked>
+                    Primary Contact
                 </label>
-                </div>
+
             </fieldset>
                     </div>
                 </section>
@@ -308,12 +315,12 @@
 
                 <div class="field">
                     <label>Date of Birth</label>
-                    <input data-field="date_of_birth" type="date">
+                    <input data-field="date_of_birth" type="date" required>
                 </div>
 
                 <div class="field">
                     <label>Grade Level</label>
-                    <select data-field="grade_level">
+                    <select data-field="grade_level" required>
                         <option value="">Select Grade</option>
                         <option>Preschool</option>
                         <option>Pre-K</option>
@@ -335,7 +342,7 @@
 
                 <div class="field">
                     <label>School Type</label>
-                    <select data-field="school_type">
+                    <select data-field="school_type" required>
                         <option value="">Select type</option>
                         <option>Private</option>
                         <option>Public</option>
@@ -380,12 +387,12 @@
             <div class="grid">
                 <div class="field">
                     <label>First name *</label>
-                    <input data-field="first_name" required>
+                    <input data-field="first_name">
                 </div>
 
                 <div class="field">
                     <label>Last name *</label>
-                    <input data-field="last_name" required>
+                    <input data-field="last_name">
                 </div>
 
                 <div class="field">
@@ -476,7 +483,7 @@
             </form>
         </main>
 
-   <!--- <script type="module" src="/src/application-form.ts"></script> -->
+ <script type="module" src="/src/waitlist-application.ts"></script>
 </body>
 </html>
 
