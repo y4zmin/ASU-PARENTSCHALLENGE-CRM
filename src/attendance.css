@@ -60,6 +60,16 @@
   outline: 2px solid #394761;
   outline-offset: 2px;
 }
+/* makes keyboard focus visible across the attendance page */
+.attendance select:focus-visible,
+.attendance a:focus-visible,
+.attendance button:focus-visible,
+.attendance input:focus-visible,
+.nav-bar a:focus-visible {
+  outline: 3px solid #394761;
+  outline-offset: 3px;
+}
+
 
 /* border around the table; scrolls sideways on small screens */
 .table-wrapper {
@@ -90,7 +100,13 @@
   border-top: 1px solid #e3e9e5;
   vertical-align: top;
 }
-
+/* improves readability when multiple attendees are listed */
+.attendance-table td:nth-child(4) {
+  max-width: 420px;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 /* every other row is light gray to make rows easier to read */
 .attendance-table tbody tr:nth-child(even) {
   background-color: #f8faf9;
