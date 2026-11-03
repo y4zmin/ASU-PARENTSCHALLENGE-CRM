@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parents Challenge Portal</title>
+    <link rel="stylesheet" href="src/dashboard.css">
+    <link rel="stylesheet" href="src/manage-applications.css">
+</head>
+<body>
+    <main class="page">
+
+    <!--header-->
+        <header class="header">
+            <a href="#" class="logo-link" aria-label="Parents Challenge home">
+                <img
+                    src="src/assets/parents-challenge-logo.jpg"
+                    alt="Parents Challenge Colorado"
+                    class="logo"
+                >
+            </a>
+            <div class="header-links">
+                <a href="#">Contact Us</a>
+                <span class="separator">|</span>
+                <a href="index.html">Sign Out</a>
+            </div>
+        </header>
+
+    <!--Greeting-->
+    <h1 class="welcome-title">Welcome to Your Staff Dashboard, Sarah Smith</h1> <!--name of actual user will be queried/creds. stored-->
+
+    <!--menu navigation-->
+    <nav>
+        <ul class="nav-bar">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Families</a></li>
+            <li><a href="#">Scholars</a></li>
+            <li><a href="#">Sessions</a></li>
+            <li><a href="#">Attendance</a></li>
+            <li><a href="#">Parent Coordinators</a></li>
+            <li><a href="#">Documents</a></li>
+            <li><a href="#">Reports & Analytics</a></li>
+            <l1><a href="manage-applications.html">Applications</a></l1>
+        </ul>
+    </nav>
+
+<main class="applications-page">
+    <div class="page-heading">
+        <h1>Pending Applications</h1>
+    </div>
+
+    <!--Application summary cards-->
+    <section class="application-stats">
+
+        <div class="stat-card">
+            <p>Pending Review</p>
+            <h2 id="pending-count">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <p>Under Review</p>
+            <h2 id="review-count">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <p>Approved</p>
+            <h2 id="approved-count">0</h2>
+        </div>
+
+        <div class="stat-card">
+            <p>Total Applications</p>
+            <h2 id="total-count">0</h2>
+        </div>
+
+    </section>
+
+    <section class="application-controls">
+
+        <div class="search-container">
+            <span class="search-icon"></span>
+            <input
+                type="text"
+                id="application-search"
+                placeholder="Search by family name or application number"
+            >
+        </div>
+
+        <select id="status-filter">
+            <option value="all">All Statuses</option>
+            <option value="pending_review">Pending Review</option>
+            <option value="under_review">Under Review</option>
+            <option value="approved">Approved</option>
+        </select>
+
+    </section>
+
+    <section class="applications-table-container">
+
+        <table class="applications-table">
+
+            <thead>
+                <tr>
+                    <th>Application #</th>
+                    <th>Family Name</th>
+                    <th>Submitted On</th>
+                    <th>Program Year</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="applications-table-body">
+            </tbody>
+
+        </table>
+
+        <p id="no-applications" class="no-applications" hidden>
+            No applications found.
+        </p>
+
+    </section>
+
+</main>
+
+<!-- application details -->
+<dialog id="application-dialog" class="application-dialog">
+
+    <div class="dialog-header">
+        <h2>Application Details</h2>
+        <button id="close-dialog" class="close-button"></button>
+    </div>
+
+    <div id="application-details">
+    </div>
+
+    <div class="dialog-actions">
+        <button id="dialog-approve" class="approve-button">
+            Approve Application
+        </button>
+        <button id="dialog-close" class="secondary-button">
+            Close
+        </button>
+    </div>
+
+</dialog>
+
+<script type="module" src="/src/manage-applications.ts"></script>
