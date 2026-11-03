@@ -32,11 +32,11 @@ interface PersonName {
   last_name: string
 }
 
-// one person who came to a session (attendance_members table)
+// one person at a session (attendance_members table)
 interface AttendeeRow {
-  member_type: string
-  other_member_name: string | null
-  guest_name: string | null
+  attendee_type: string
+  display_name: string | null
+  attendance_status: string | null
   parents: PersonName | null
   scholars: PersonName | null
 }
@@ -63,14 +63,9 @@ interface SessionRow {
   program_years: ProgramYearRow | null
 }
 
-// registrations table
-interface RegistrationRow {
-  sessions: SessionRow | null
-}
-
 // one attendance row with everything connected to it
 interface AttendanceRow {
-  registrations: RegistrationRow | null
+  sessions: SessionRow | null
   attendance_members: AttendeeRow[]
 }
 
@@ -79,38 +74,35 @@ let attendanceRecords: AttendanceRecord[] = []
 
 // get each person's name with who they are
 function getAttendeeName(member: AttendeeRow): string {
-  if (member.member_type === 'parent' && member.parents) {
+  if (member.attendee_type === 'parent' && member.parents) {
     return member.parents.first_name + ' ' + member.parents.last_name + ' (Parent)'
   }
 
-  if (member.member_type === 'scholar' && member.scholars) {
+  if (member.attendee_type === 'scholar' && member.scholars) {
     return member.scholars.first_name + ' ' + member.scholars.last_name + ' (Scholar)'
   }
 
-  if (member.guest_name) {
-     return member.guest_name + ' (Guest)'
-  }
-
-  if (member.other_member_name) {
-    return member.other_member_name + ' (Family)'
+  if (member.display_name) {
+    return member.display_name + ' (Guest)'
   }
 
   return 'Unknown'
 }
 
 function toAttendanceRecord(row: AttendanceRow): AttendanceRecord | null {
-  
   // skip this row if the session didn't come back
-  if (!row.registrations || !row.registrations.sessions) {
+  if (!row.sessions) {
     return null
   }
 
-  const session = row.registrations.sessions
+  const session = row.sessions
 
   // names of everyone who came
   const attendees: string[] = []
   for (const member of row.attendance_members) {
-    attendees.push(getAttendeeName(member))
+    if (member.attendance_status === 'attended') {
+      attendees.push(getAttendeeName(member))
+    }
   }
 
   // grey dot if the session has no type
@@ -155,15 +147,13 @@ async function loadAttendance(): Promise<AttendanceRecord[] | null> {
   const { data, error } = await supabase
     .from('attendance')
     .select(`
-      registrations (
-        sessions (
-          title, session_date, start_time, end_time, is_mandatory,
-          session_types ( name, color_code ),
-          program_years ( name )
-        )
+      sessions (
+        title, session_date, start_time, end_time, is_mandatory,
+        session_types ( name, color_code ),
+        program_years ( name )
       ),
       attendance_members (
-        member_type, other_member_name, guest_name,
+        attendee_type, display_name, attendance_status,
         parents ( first_name, last_name ),
         scholars ( first_name, last_name )
       )
@@ -403,7 +393,6 @@ function showYear(year: string): void {
     </div>
   `
 }
-
 
 // runs when a different year is picked or the search changes
 function yearChange(): void {
