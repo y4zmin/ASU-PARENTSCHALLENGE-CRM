@@ -1,0 +1,88 @@
+/*
+Styles for the staff attendance tab.
+Table, toolbar, and dropdown styles come from attendance.css.
+*/
+
+/* summary cards at the top (buildSummaryCards) */
+.staff-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.staff-card {
+  border: 1px solid #c6d2c9;
+  border-radius: 8px;
+  background-color: #f4f6f5;
+  padding: 14px 18px;
+}
+
+.staff-card-label {
+  margin: 0;
+  font-size: 14px;
+  color: #455674;
+}
+
+.staff-card-number {
+  margin: 6px 0 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #394761;
+}
+
+/* left-align every column in the staff table so headers and values line up (showYear) */
+#staff-attendance-section .attendance-table th,
+#staff-attendance-section .attendance-table td {
+  text-align: left;
+}
+
+/* mandatory session not attended yet (buildFamilyRows) */
+.mandatory-missing {
+  color: #a35a0a;
+  font-weight: 600;
+}
+
+/* small progress bar in each family row (buildFamilyRows) */
+.mini-bar {
+  width: 140px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #e3e8e5;
+  overflow: hidden;
+}
+
+.mini-fill {
+  height: 100%;
+  background-color: #394761;
+}
+
+.mini-fill.complete {
+  background-color: #4f8a5b;
+}
+
+/* complete / in progress label (buildFamilyRows) */
+.status-pill {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pill.complete {
+  background-color: #e3f1e6;
+  color: #2f6b3c;
+}
+
+.status-pill.in-progress {
+  background-color: #fdf0e1;
+  color: #a35a0a;
+}
+
+/* 2 cards per row on small screens */
+@media (max-width: 800px) {
+  .staff-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

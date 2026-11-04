@@ -5,6 +5,7 @@ and how close each family is to the 12 hours they need.
 */
 
 import './attendance.css'
+import './staff-attendance.css'
 import { supabase } from './supabase'
 
 // empty box in html where the staff attendance tab goes; '!' at end to say box is always on page
@@ -22,6 +23,7 @@ interface StaffRecord {
   sessionDate: string
   startTime: string
   endTime: string
+  mandatory: boolean
 }
 
 // one family's totals for a program year
@@ -29,6 +31,7 @@ interface FamilySummary {
   familyName: string
   sessionCount: number
   hours: number
+  mandatoryDone: boolean
 }
 
 // program_years table
@@ -41,6 +44,7 @@ interface SessionRow {
   session_date: string
   start_time: string
   end_time: string
+  is_mandatory: boolean
   program_years: ProgramYearRow | null
 }
 
@@ -99,6 +103,7 @@ function toStaffRecord(row: AttendanceRow): StaffRecord | null {
     sessionDate: session.session_date,
     startTime: session.start_time,
     endTime: session.end_time,
+    mandatory: session.is_mandatory,
   }
 }
 
@@ -119,7 +124,7 @@ async function loadStaffAttendance(): Promise<StaffRecord[] | null> {
     .from('attendance')
     .select(`
       sessions (
-        session_date, start_time, end_time,
+        session_date, start_time, end_time, is_mandatory,
         program_years ( name )
       ),
       registrations (
@@ -199,15 +204,61 @@ function getFamilySummaries(year: string): FamilySummary[] {
     }
 
     if (!summary) {
-      summary = { familyName: record.familyName, sessionCount: 0, hours: 0 }
+      summary = { familyName: record.familyName, sessionCount: 0, hours: 0, mandatoryDone: false }
       summaries.push(summary)
     }
 
     summary.sessionCount += 1
     summary.hours += getHours(record)
+
+    if (record.mandatory) {
+      summary.mandatoryDone = true
+    }
   }
 
+  summaries.sort(fewestHoursFirst)
   return summaries
+}
+
+// puts families with the fewest hours first, so the ones who need help are at the top
+function fewestHoursFirst(a: FamilySummary, b: FamilySummary): number {
+  return a.hours - b.hours
+}
+
+// builds summary cards at top
+function buildSummaryCards(summaries: FamilySummary[]): string {
+  let completed = 0
+  let totalHours = 0
+
+  for (const summary of summaries) {
+    if(summary.hours >= requiredHours) {
+      completed += 1
+    }
+    totalHours += summary.hours
+  }
+
+  const inProgress = summaries.length - completed
+
+  return `
+    <div class="staff-cards">
+      <div class="staff-card">
+        <p class="staff-card-label">Families Attending</p>
+        <p class="staff-card-number">${summaries.length}</p>
+      </div>
+      <div class="staff-card">
+        <p class="staff-card-label">Completed ${requiredHours} Hours</p>
+        <p class="staff-card-number">${completed}</p>
+      </div>
+      <div class="staff-card">
+        <p class="staff-card-label">Still Working Toward ${requiredHours}</p>
+        <p class="staff-card-number">${inProgress}</p>
+      </div>
+      <div class="staff-card">
+        <p class="staff-card-label">Total Family Hours</p>
+        <p class="staff-card-number">${totalHours}</p>
+      </div>
+    </div>
+  `
 }
 
 // builds one table row for each family
@@ -215,11 +266,35 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
   let rows = ''
 
   for (const summary of summaries) {
+    let percent = (summary.hours / requiredHours) * 100
+    if (percent > 100) {
+      percent = 100
+    }
+
+    let status = '<span class="status-pill in-progress">In progress</span>'
+    let fillClass = 'mini-fill'
+    if (summary.hours >= requiredHours) {
+      status = '<span class="status-pill complete">Complete</span>'
+      fillClass = 'mini-fill complete'
+    }
+
+    let mandatory = '<span class="mandatory-missing">Not yet</span>'
+    if (summary.mandatoryDone) {
+      mandatory = 'Attended'
+    }
+
     rows += `
       <tr>
         <td>${summary.familyName}</td>
         <td>${summary.sessionCount}</td>
+        <td>${mandatory}</td>
+        <td>
+          <div class="mini-bar">
+            <div class="${fillClass}" style="width: ${percent}%;"></div>
+          </div>
+        </td>
         <td class="hours-cell">${summary.hours} / ${requiredHours}</td>
+        <td>${status}</td>
       </tr>
     `
   }
@@ -227,23 +302,28 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
   return rows
 }
 
-// shows the families table for one program year
+// shows the cards and families table for one program year
 function showYear(year: string): void {
   const yearContent = document.querySelector<HTMLElement>('#staff-year-content')!
-  const rows = buildFamilyRows(getFamilySummaries(year))
+  const summaries = getFamilySummaries(year)
 
   yearContent.innerHTML = `
+    ${buildSummaryCards(summaries)}
+
     <div class="table-wrapper">
       <table class="attendance-table">
         <thead>
           <tr>
             <th>Family</th>
-            <th>Sessions Attended</th>
+            <th>Sessions</th>
+            <th>Mandatory</th>
+            <th>Progress</th>
             <th>Hours</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
-          ${rows}
+          ${buildFamilyRows(summaries)}
         </tbody>
       </table>
     </div>
