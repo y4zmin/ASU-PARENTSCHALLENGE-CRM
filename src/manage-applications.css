@@ -1,9 +1,5 @@
 
 
-/* =========================================
-   APPLICATION DASHBOARD
-========================================= */
-
 .application-container {
     width: 96%;
     max-width: 1800px;
@@ -28,9 +24,6 @@
 }
 
 
-/* =========================================
-   STATISTICS CARDS
-========================================= */
 
 .statistics-grid {
     display: grid;
@@ -59,9 +52,6 @@
 }
 
 
-/* =========================================
-   APPLICATION TABLE SECTION
-========================================= */
 
 .applications-section {
     background: #ffffff;
@@ -89,11 +79,6 @@
     font-size: 15px;
     margin: 0;
 }
-
-
-/* =========================================
-   SEARCH AND FILTER
-========================================= */
 
 .filter-container {
     display: flex;
@@ -126,10 +111,6 @@
     outline-offset: 1px;
 }
 
-
-/* =========================================
-   APPLICATION TABLE
-========================================= */
 
 .table-container {
     width: 100%;
@@ -180,11 +161,6 @@
     color: #687b91;
 }
 
-
-/* =========================================
-   BUTTONS
-========================================= */
-
 .export-button,
 .view-button {
     background: #5e8fbd;
@@ -203,9 +179,6 @@
 }
 
 
-/* =========================================
-   STATUS BADGES
-========================================= */
 
 .status-badge {
     display: inline-block;
@@ -233,9 +206,6 @@
 }
 
 
-/* =========================================
-   APPLICATION DETAILS POPUP
-========================================= */
 
 .application-dialog {
     width: min(1000px, 94vw);
@@ -297,9 +267,6 @@
 }
 
 
-/* =========================================
-   POPUP SUMMARY
-========================================= */
 
 .application-summary {
     display: grid;
@@ -329,9 +296,6 @@
 }
 
 
-/* =========================================
-   FAMILY / PARENT / SCHOLAR SECTIONS
-========================================= */
 
 .detail-section {
     margin-bottom: 32px;
@@ -370,11 +334,6 @@
     font-weight: 600;
     overflow-wrap: anywhere;
 }
-
-
-/* =========================================
-   PARENT AND SCHOLAR CARDS
-========================================= */
 
 .person-card {
     background: #f7f9f8;
@@ -469,11 +428,6 @@
     display: none !important;
 }
 
-
-/* =========================================
-   RESPONSIVE DESIGN
-========================================= */
-
 @media (max-width: 900px) {
 
     .statistics-grid {
@@ -489,8 +443,8 @@
         margin-top: 40px;
     }
 
-    .application-page-header h1 {
-        font-size: 29px;
+    .application-page-header h2 {
+        font-size: 2rem;
     }
 
     .statistics-grid {

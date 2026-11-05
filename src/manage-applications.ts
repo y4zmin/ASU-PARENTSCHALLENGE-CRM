@@ -1025,5 +1025,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 
-const { data: { session }, error } =
-    await supabase.auth.getSession();
+
