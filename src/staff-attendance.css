@@ -86,3 +86,8 @@ Table, toolbar, and dropdown styles come from attendance.css.
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* search box in the toolbar (startStaffAttendanceTab) */
+#staff-attendance-search {
+  width: 215px;
+}

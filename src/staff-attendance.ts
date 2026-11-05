@@ -225,6 +225,24 @@ function fewestHoursFirst(a: FamilySummary, b: FamilySummary): number {
   return a.hours - b.hours
 }
 
+//keeps only the families whose name matches the search
+function filterFamilies(summaries: FamilySummary[], query: string): FamilySummary[] {
+  const search = query.trim().toLowerCase()
+
+  if (!search) {
+    return summaries
+  }
+
+  const matches: FamilySummary[] = []
+  for (const summary of summaries) {
+    if (summary.familyName.toLowerCase().includes(search)) {
+      matches.push(summary)
+    }
+  }
+
+  return matches
+}
+
 // builds summary cards at top
 function buildSummaryCards(summaries: FamilySummary[]): string {
   let completed = 0
@@ -307,8 +325,18 @@ function showYear(year: string): void {
   const yearContent = document.querySelector<HTMLElement>('#staff-year-content')!
   const summaries = getFamilySummaries(year)
 
+  // only the families that match the search
+  const query = document.querySelector<HTMLInputElement>('#staff-attendance-search')!.value
+  const filtered = filterFamilies(summaries, query)
+
+  let resultsLine = ''
+  if (query.trim()) {
+    resultsLine = '<p class="search-results">Showing ' + filtered.length + ' of ' + summaries.length + ' families</p>'
+  }
+
   yearContent.innerHTML = `
     ${buildSummaryCards(summaries)}
+    ${resultsLine}
 
     <div class="table-wrapper">
       <table class="attendance-table">
@@ -323,7 +351,11 @@ function showYear(year: string): void {
           </tr>
         </thead>
         <tbody>
-          ${buildFamilyRows(summaries)}
+          ${buildFamilyRows(filtered) || `
+            <tr>
+              <td colspan="6" class="empty-state">No matching families found.</td>
+            </tr>
+          `}
         </tbody>
       </table>
     </div>
@@ -366,6 +398,15 @@ async function startStaffAttendanceTab(): Promise<void> {
           ${yearOptions(programYears)}
         </select>
       </div>
+
+       <div class="attendance-controls">
+        <input
+          id="staff-attendance-search"
+          type="search"
+          placeholder="Search families"
+          aria-label="Search families"
+        />
+      </div>
     </div>
 
     <div id="staff-year-content"></div>
@@ -376,6 +417,7 @@ async function startStaffAttendanceTab(): Promise<void> {
 
   // update the table when the year changes
   document.querySelector<HTMLSelectElement>('#staff-year-select')!.addEventListener('change', yearChange)
+  document.querySelector<HTMLInputElement>('#staff-attendance-search')!.addEventListener('input', yearChange)
 }
 
 // open/close the attendance tab
