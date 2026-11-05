@@ -1,339 +1,750 @@
 
-.applications-page {
-    width: 100%;
-    padding: 65px 0 40px;
-    color: #344d70;
-    font-family: Arial, Helvetica, sans-serif;
-    box-sizing: border-box;
+
+/* =========================================
+   APPLICATION DASHBOARD
+========================================= */
+
+.application-container {
+    width: 96%;
+    max-width: 1800px;
+    margin: 75px auto 40px;
+    color: #30466a;
 }
 
-.applications-page * {
-    box-sizing: border-box;
-}
-
-/* Page heading */
-
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.application-page-header {
     margin-bottom: 35px;
 }
 
-.page-heading h1 {
-    font-size: 40px;
-    color: #344d70;
-    margin: 0;
-    font-weight: 700;
+.application-page-header h1 {
+    font-size: 38px;
+    color: #30466a;
+    margin: 0 0 8px;
 }
 
-.export-button {
-    background-color: #6094c2;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 13px 22px;
+.application-page-header p {
+    color: #536781;
     font-size: 16px;
-    cursor: pointer;
+    margin: 0;
 }
 
-.export-button:hover {
-    background-color: #477eae;
-}
 
-/* Summary cards */
+/* =========================================
+   STATISTICS CARDS
+========================================= */
 
-.application-stats {
+.statistics-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-bottom: 22px;
+    gap: 20px;
+    margin-bottom: 25px;
 }
 
 .stat-card {
-    background-color: #f4f7f5;
-    border: 1px solid #c7d5cb;
+    background: #f3f5f3;
+    border: 1px solid #c6d3ca;
     border-radius: 12px;
-    padding: 18px 20px;
-    min-height: 105px;
+    padding: 22px;
 }
 
 .stat-card p {
-    margin: 0 0 8px;
-    font-size: 18px;
-    color: #344d70;
+    color: #30466a;
+    font-size: 16px;
+    margin: 0 0 7px;
 }
 
 .stat-card h2 {
+    color: #30466a;
+    font-size: 34px;
     margin: 0;
-    font-size: 36px;
-    color: #344d70;
 }
 
-/* Search and filters */
 
-.application-controls {
-    display: flex;
-    gap: 18px;
-    margin-bottom: 22px;
+/* =========================================
+   APPLICATION TABLE SECTION
+========================================= */
+
+.applications-section {
+    background: #ffffff;
+    border: 1px solid #c6d3ca;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.search-container {
+.section-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    gap: 20px;
+    padding: 25px 22px;
+}
+
+.section-header h2 {
+    font-size: 23px;
+    color: #30466a;
+    margin: 0 0 7px;
+}
+
+.section-header p {
+    color: #687b91;
+    font-size: 15px;
+    margin: 0;
+}
+
+
+/* =========================================
+   SEARCH AND FILTER
+========================================= */
+
+.filter-container {
+    display: flex;
+    gap: 15px;
+    padding: 0 22px 22px;
+}
+
+.filter-container input,
+.filter-container select {
+    padding: 12px 15px;
+    border: 1px solid #c6d3ca;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #30466a;
+    font-size: 15px;
+}
+
+.filter-container input {
     flex: 1;
-    border: 1px solid #c7d5cb;
-    border-radius: 10px;
-    padding: 0 15px;
-    height: 53px;
+    min-width: 0;
 }
 
-.search-icon {
-    color: #6094c2;
-    font-size: 26px;
-    margin-right: 12px;
+.filter-container select {
+    min-width: 210px;
 }
 
-.search-container input {
-    border: none;
-    outline: none;
+.filter-container input:focus,
+.filter-container select:focus {
+    outline: 2px solid #7196bb;
+    outline-offset: 1px;
+}
+
+
+/* =========================================
+   APPLICATION TABLE
+========================================= */
+
+.table-container {
     width: 100%;
-    font-size: 17px;
-    color: #344d70;
-    background: transparent;
-}
-
-.search-container input::placeholder {
-    color: #788ca8;
-}
-
-.application-controls select {
-    min-width: 170px;
-    padding: 0 15px;
-    border: 1px solid #c7d5cb;
-    border-radius: 10px;
-    background-color: white;
-    color: #344d70;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-/* Applications table */
-
-.applications-table-container {
-    width: 100%;
-    border: 1px solid #c7d5cb;
-    border-radius: 11px;
     overflow-x: auto;
 }
 
-.applications-table {
+.table-container table {
     width: 100%;
     border-collapse: collapse;
-    text-align: left;
     white-space: nowrap;
 }
 
-.applications-table thead {
-    background-color: #c9d6cd;
+.table-container thead {
+    background: #c6d3ca;
 }
 
-.applications-table th {
-    padding: 17px 20px;
+.table-container th {
+    padding: 18px 20px;
+    color: #30466a;
     font-size: 17px;
     font-weight: 700;
-    color: #344d70;
+    text-align: left;
 }
 
-.applications-table td {
-    padding: 13px 20px;
-    border-bottom: 1px solid #e0e7e3;
-    font-size: 17px;
-    color: #344d70;
+.table-container td {
+    padding: 17px 20px;
+    border-bottom: 1px solid #dce4df;
+    color: #30466a;
+    font-size: 16px;
 }
 
-.applications-table tbody tr:nth-child(even) {
-    background-color: #f7f9f8;
+.table-container tbody tr:nth-child(even) {
+    background: #f7f9f8;
 }
 
-.applications-table tbody tr:hover {
-    background-color: #f0f5f1;
+.table-container tbody tr:hover {
+    background: #edf2ef;
 }
 
-.applications-table tbody tr:last-child td {
-    border-bottom: none;
+.table-container td:first-child,
+.table-container td:nth-child(2) {
+    font-weight: 600;
 }
 
-/* Status labels */
+#no-applications {
+    padding: 25px;
+    text-align: center;
+    color: #687b91;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.export-button,
+.view-button {
+    background: #5e8fbd;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 19px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.export-button:hover,
+.view-button:hover {
+    background: #477aa8;
+}
+
+
+/* =========================================
+   STATUS BADGES
+========================================= */
 
 .status-badge {
     display: inline-block;
-    min-width: 145px;
+    min-width: 110px;
+    padding: 8px 14px;
+    border-radius: 20px;
     text-align: center;
-    padding: 8px 13px;
-    border-radius: 25px;
-    font-size: 15px;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .status-pending {
-    background-color: #ffe9aa;
-    color: #956000;
-}
-
-.status-review {
-    background-color: #e2e9ef;
-    color: #607995;
+    background: #e67e00;
+    color: #ffffff;
 }
 
 .status-approved {
-    background-color: #cce1d2;
-    color: #32814e;
+    background: #4e9060;
+    color: #ffffff;
 }
 
-/* Table action buttons */
-
-.view-button {
-    background-color: #6094c2;
-    color: white;
-    border: none;
-    border-radius: 9px;
-    padding: 9px 17px;
-    font-size: 15px;
-    cursor: pointer;
+.status-rejected {
+    background: #b95a5a;
+    color: #ffffff;
 }
 
-.view-button:hover {
-    background-color: #477eae;
-}
 
-.approve-button {
-    background-color: white;
-    color: #344d70;
-    border: 1px solid #6094c2;
-    border-radius: 9px;
-    padding: 8px 15px;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-.approve-button:hover {
-    background-color: #eaf1f7;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.no-applications {
-    text-align: center;
-    padding: 25px;
-    color: #788ca8;
-    font-size: 17px;
-}
-
-/* Application details popup */
+/* =========================================
+   APPLICATION DETAILS POPUP
+========================================= */
 
 .application-dialog {
-    width: min(600px, calc(100% - 32px));
-    border: 1px solid #c7d5cb;
-    border-radius: 14px;
-    padding: 25px;
-    color: #344d70;
+    width: min(1000px, 94vw);
+    max-width: 1000px;
+    max-height: 90vh;
+    padding: 0;
+    border: 1px solid #c6d3ca;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #30466a;
+    box-shadow: 0 12px 40px rgba(48, 70, 106, 0.2);
+    overflow: hidden;
 }
 
 .application-dialog::backdrop {
-    background-color: rgba(30, 45, 65, 0.45);
+    background: rgba(36, 49, 66, 0.55);
 }
 
 .dialog-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e0e7e3;
-    padding-bottom: 15px;
+    align-items: flex-start;
+    padding: 25px 30px;
+    border-bottom: 1px solid #c6d3ca;
 }
 
 .dialog-header h2 {
-    margin: 0;
-    font-size: 24px;
+    color: #30466a;
+    font-size: 25px;
+    margin: 0 0 8px;
 }
 
-.close-button {
+.dialog-header p {
+    color: #687b91;
+    font-size: 14px;
+    margin: 0;
+}
+
+.dialog-eyebrow {
+    color: #718d7c !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px !important;
+}
+
+.icon-close {
     border: none;
-    background: none;
-    color: #344d70;
-    font-size: 28px;
+    background: transparent;
+    color: #30466a;
+    font-size: 30px;
     cursor: pointer;
 }
 
-.application-detail {
-    padding: 12px 0;
-    border-bottom: 1px solid #e0e7e3;
+.dialog-content {
+    padding: 25px 30px;
+    max-height: calc(90vh - 165px);
+    overflow-y: auto;
 }
 
-.application-detail strong {
-    display: block;
-    margin-bottom: 5px;
+
+/* =========================================
+   POPUP SUMMARY
+========================================= */
+
+.application-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    padding: 20px;
+    margin-bottom: 30px;
+    background: #f3f5f3;
+    border: 1px solid #c6d3ca;
+    border-radius: 10px;
 }
+
+.application-summary div {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.application-summary div > span:first-child {
+    color: #536781;
+    font-size: 14px;
+}
+
+.application-summary strong {
+    color: #30466a;
+    font-size: 16px;
+}
+
+
+/* =========================================
+   FAMILY / PARENT / SCHOLAR SECTIONS
+========================================= */
+
+.detail-section {
+    margin-bottom: 32px;
+}
+
+.detail-section h3 {
+    color: #30466a;
+    font-size: 21px;
+    padding: 13px 16px;
+    margin-bottom: 20px;
+    background: #c6d3ca;
+    border-radius: 7px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 30px;
+}
+
+.detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.detail-field span {
+    color: #687b91;
+    font-size: 13px;
+}
+
+.detail-field strong {
+    color: #30466a;
+    font-size: 15px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================
+   PARENT AND SCHOLAR CARDS
+========================================= */
+
+.person-card {
+    background: #f7f9f8;
+    border: 1px solid #c6d3ca;
+    border-radius: 9px;
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+.person-card h4 {
+    color: #30466a;
+    font-size: 17px;
+    margin: 0 0 20px;
+}
+
+.application-selections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 35px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #dce4df;
+}
+
+.application-selections div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.application-selections span {
+    color: #687b91;
+    font-size: 13px;
+}
+
+.application-selections strong {
+    color: #30466a;
+    font-size: 15px;
+}
+
+
+/* =========================================
+   POPUP ACTION BUTTONS
+========================================= */
 
 .dialog-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 22px;
+    padding: 20px 30px;
+    background: #f3f5f3;
+    border-top: 1px solid #c6d3ca;
 }
 
-.secondary-button {
-    background-color: #eef2ef;
-    border: 1px solid #c7d5cb;
-    color: #344d70;
-    border-radius: 9px;
-    padding: 10px 18px;
+.dialog-actions button {
+    border: none;
+    border-radius: 7px;
+    padding: 12px 23px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
 }
 
-/* Responsive layout */
+.approve-button {
+    background: #4e9060;
+    color: white;
+}
+
+.approve-button:hover {
+    background: #3e7950;
+}
+
+.reject-button {
+    background: #b95a5a;
+    color: white;
+}
+
+.reject-button:hover {
+    background: #9e4545;
+}
+
+.close-button {
+    background: #dce3df;
+    color: #30466a;
+}
+
+.close-button:hover {
+    background: #cbd6cf;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
 
 @media (max-width: 900px) {
 
-    .application-stats {
+    .statistics-grid {
         grid-template-columns: repeat(2, 1fr);
-    }
-
-    .applications-page {
-        padding-top: 35px;
-    }
-
-    .page-heading h1 {
-        font-size: 32px;
     }
 
 }
 
 @media (max-width: 600px) {
 
-    .application-stats {
-        grid-template-columns: 1fr;
+    .application-container {
+        width: 94%;
+        margin-top: 40px;
     }
 
-    .application-controls {
-        flex-direction: column;
+    .application-page-header h1 {
+        font-size: 29px;
     }
 
-    .application-controls select {
-        height: 48px;
+    .statistics-grid {
+        gap: 12px;
     }
 
-    .page-heading h1 {
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-card h2 {
         font-size: 27px;
     }
 
-    .applications-table th,
-    .applications-table td {
-        padding: 12px;
-        font-size: 14px;
+    .section-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
+    .filter-container {
+        flex-direction: column;
+    }
+
+    .filter-container select {
+        width: 100%;
+    }
+
+    .application-dialog {
+        width: 96vw;
+        max-height: 94vh;
+    }
+
+    .dialog-header,
+    .dialog-content {
+        padding: 18px;
+    }
+
+    .detail-grid,
+    .application-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .dialog-actions {
+        padding: 15px;
+        flex-wrap: wrap;
+    }
+
+    .dialog-actions button {
+        flex: 1;
+        padding: 12px;
+    }
+
+}
+
+
+
+/* =========================================
+   CENTERED APPLICATION POPUP
+========================================= */
+
+.application-dialog {
+    position: fixed;
+
+    /* Center horizontally and vertically */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: min(1000px, calc(100vw - 40px));
+    height: min(850px, calc(100vh - 40px));
+    max-width: none;
+    max-height: none;
+
+    padding: 0;
+    margin: 0;
+
+    border: 1px solid #c6d3ca;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #30466a;
+
+    box-shadow: 0 12px 40px rgba(48, 70, 106, 0.2);
+
+    overflow: hidden;
+
+    /* Organize popup into header, content, and footer */
+    flex-direction: column;
+}
+
+/* Only display flex when dialog is open */
+.application-dialog[open] {
+    display: flex;
+}
+
+/* Background overlay */
+.application-dialog::backdrop {
+    background: rgba(36, 49, 66, 0.55);
+}
+
+
+/* =========================================
+   POPUP HEADER
+========================================= */
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    padding: 22px 30px;
+
+    border-bottom: 1px solid #c6d3ca;
+    background: #ffffff;
+}
+
+.dialog-header h2 {
+    color: #30466a;
+    font-size: 25px;
+    margin: 0 0 8px;
+}
+
+.dialog-header p {
+    color: #687b91;
+    font-size: 14px;
+    margin: 0;
+}
+
+.icon-close {
+    border: none;
+    background: transparent;
+    color: #30466a;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+
+/* =========================================
+   SCROLLABLE POPUP CONTENT
+========================================= */
+
+.dialog-content {
+    flex: 1;
+    min-height: 0;
+
+    padding: 25px 30px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Scrollbar styling */
+.dialog-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.dialog-content::-webkit-scrollbar-thumb {
+    background: #aab5ae;
+    border-radius: 10px;
+}
+
+.dialog-content::-webkit-scrollbar-track {
+    background: #f3f5f3;
+}
+
+
+/* =========================================
+   POPUP FOOTER / ACTION BUTTONS
+========================================= */
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+
+    flex-shrink: 0;
+
+    padding: 18px 30px;
+
+    background: #f3f5f3;
+    border-top: 1px solid #c6d3ca;
+}
+
+.dialog-actions button {
+    border: none;
+    border-radius: 8px;
+
+    padding: 12px 23px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.approve-button {
+    background: #4e9060;
+    color: #ffffff;
+}
+
+.approve-button:hover {
+    background: #3e7950;
+}
+
+.reject-button {
+    background: #b95a5a;
+    color: #ffffff;
+}
+
+.reject-button:hover {
+    background: #9e4545;
+}
+
+.close-button {
+    background: #dce3df;
+    color: #30466a;
+}
+
+.close-button:hover {
+    background: #cbd6cf;
+}
+
+
+/* =========================================
+   SMALLER SCREENS
+========================================= */
+
+@media (max-width: 600px) {
+
+    .application-dialog {
+        width: calc(100vw - 24px);
+        height: calc(100dvh - 24px);
+        border-radius: 10px;
+    }
+
+    .dialog-header {
+        padding: 18px;
+    }
+
+    .dialog-content {
+        padding: 18px;
+    }
+
+    .dialog-actions {
+        padding: 14px;
+        gap: 8px;
+    }
+
+    .dialog-actions button {
+        flex: 1;
+        padding: 12px 8px;
+        font-size: 13px;
+    }
 }

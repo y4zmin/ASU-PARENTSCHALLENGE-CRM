@@ -44,104 +44,155 @@
         </ul>
     </nav>
 
-<main class="applications-page">
-    <div class="page-heading">
-        <h1>Pending Applications</h1>
-    </div>
+    <main class="application-container">
 
-    <!--Application summary cards-->
-    <section class="application-stats">
+        <header class="page-header">
+            <div>
+                <h1>Waitlist Applications</h1>
+            </div>
+        </header>
 
-        <div class="stat-card">
-            <p>Pending Review</p>
-            <h2 id="pending-count">0</h2>
+        <br>
+
+        <!-- Dashboard statistics -->
+        <section class="statistics-grid">
+
+            <article class="stat-card">
+                <p>Total Applications</p>
+                <h2 id="total-count">0</h2>
+            </article>
+
+            <article class="stat-card pending-card">
+                <p>Pending Review</p>
+                <h2 id="pending-count">0</h2>
+            </article>
+
+            <article class="stat-card approved-card">
+                <p>Approved</p>
+                <h2 id="approved-count">0</h2>
+            </article>
+
+            <article class="stat-card rejected-card">
+                <p>Rejected</p>
+                <h2 id="rejected-count">0</h2>
+            </article>
+
+        </section>
+
+        <!--applications table -->
+        <section class="applications-section">
+
+            <div class="section-header">
+                <div>
+                    <h2>Submitted Applications</h2>
+                    <p>View submitted information and make application decisions.</p>
+                </div>
+
+                <button type="button" id="export-button" class="export-button">
+                    Export to CSV
+                </button>
+            </div>
+
+            <div class="filter-container">
+
+                <input
+                    type="search"
+                    id="application-search"
+                    placeholder="Search family name or application number..."
+                >
+
+                <select id="status-filter">
+                    <option value="all">All Applications</option>
+                    <option value="pending_review">Pending Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Application Number</th>
+                            <th>Family Name</th>
+                            <th>Submitted On</th>
+                            <th>Program Year</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="applications-table-body">
+                    </tbody>
+                </table>
+
+                <p id="no-applications" hidden>
+                    No applications found.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FULL APPLICATION DETAILS POPUP -->
+    <dialog id="application-dialog" class="application-dialog">
+
+        <div class="dialog-header">
+
+            <div>
+                <p class="eyebrow">APPLICATION REVIEW</p>
+                <h2>Family Application Details</h2>
+                <p id="dialog-application-number"></p>
+            </div>
+
+            <button
+                type="button"
+                id="close-dialog"
+                class="icon-close"
+                aria-label="Close application details">
+            </button>
+
         </div>
 
-        <div class="stat-card">
-            <p>Under Review</p>
-            <h2 id="review-count">0</h2>
+        <!-- Application information is dynamically populated -->
+        <div id="application-details" class="dialog-content">
         </div>
 
-        <div class="stat-card">
-            <p>Approved</p>
-            <h2 id="approved-count">0</h2>
+        <!-- Popup actions -->
+        <div class="dialog-actions">
+
+            <button
+                type="button"
+                id="dialog-approve"
+                class="approve-button">
+                Approve
+            </button>
+
+            <button
+                type="button"
+                id="dialog-reject"
+                class="reject-button">
+                Reject
+            </button>
+
+            <button
+                type="button"
+                id="dialog-close"
+                class="close-button">
+                Close
+            </button>
+
         </div>
 
-        <div class="stat-card">
-            <p>Total Applications</p>
-            <h2 id="total-count">0</h2>
-        </div>
+    </dialog>
 
-    </section>
+    <script type="module" src="/src/manage-applications.ts"></script>
 
-    <section class="application-controls">
-
-        <div class="search-container">
-            <span class="search-icon"></span>
-            <input
-                type="text"
-                id="application-search"
-                placeholder="Search by family name or application number"
-            >
-        </div>
-
-        <select id="status-filter">
-            <option value="all">All Statuses</option>
-            <option value="pending_review">Pending Review</option>
-            <option value="under_review">Under Review</option>
-            <option value="approved">Approved</option>
-        </select>
-
-    </section>
-
-    <section class="applications-table-container">
-
-        <table class="applications-table">
-
-            <thead>
-                <tr>
-                    <th>Application #</th>
-                    <th>Family Name</th>
-                    <th>Submitted On</th>
-                    <th>Program Year</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody id="applications-table-body">
-            </tbody>
-
-        </table>
-
-        <p id="no-applications" class="no-applications" hidden>
-            No applications found.
-        </p>
-
-    </section>
-
-</main>
-
-<!-- application details -->
-<dialog id="application-dialog" class="application-dialog">
-
-    <div class="dialog-header">
-        <h2>Application Details</h2>
-        <button id="close-dialog" class="close-button"></button>
-    </div>
-
-    <div id="application-details">
-    </div>
-
-    <div class="dialog-actions">
-        <button id="dialog-approve" class="approve-button">
-            Approve Application
-        </button>
-        <button id="dialog-close" class="secondary-button">
-            Close
-        </button>
-    </div>
-
-</dialog>
-
-<script type="module" src="/src/manage-applications.ts"></script>
+</body>
+</html>

@@ -1,255 +1,363 @@
 
+import { supabase } from "./supabase";
+
+interface ProgramYear {
+    name: string;
+}
+
+interface ApplicationParent {
+    id: number;
+    application_id: number;
+    first_name: string;
+    last_name: string;
+    email: string | null;
+    phone: string | null;
+    relationship_to_scholar: string | null;
+    is_primary: boolean | null;
+    preferred_language: string | null;
+    ethnicity: string | null;
+    education_level: string | null;
+    employer: string | null;
+}
+
+interface ApplicationScholar {
+    id: number;
+    application_id: number;
+    first_name: string;
+    last_name: string;
+    date_of_birth: string | null;
+    grade_level: string | null;
+    school_type: string | null;
+    school_name: string | null;
+    ethnicity: string | null;
+    applying_for_scholarship: boolean | null;
+    applying_for_grant: boolean | null;
+}
+
 type ApplicationStatus =
-    | "pending_review"
+    | "waitlisted"
     | "under_review"
-    | "approved";
+    | "approved"
+    | "rejected"
+    | "withdrawn";
 
 interface Application {
     id: number;
-    applicationNumber: string;
-    familyName: string;
-    submittedOn: string;
-    programYear: string;
+    application_number: string | null;
+    submission_token: string;
+    program_year_id: number | null;
+
+    family_name: string;
+    address_line1: string | null;
+    address_line2: string | null;
+    city: string | null;
+    state: string | null;
+    zip_code: string | null;
+    county: string | null;
+    primary_phone: string | null;
+    primary_email: string;
+
+    application_type: "new_family" | "returning_family";
     status: ApplicationStatus;
-    primaryEmail: string;
-    primaryPhone: string;
+
+    linked_family_id: number | null;
+    approved_family_id: number | null;
+
+    submitted_at: string | null;
+    reviewed_at: string | null;
+    reviewed_by: string | null;
+    review_notes: string | null;
+
+    created_at: string | null;
+    updated_at: string | null;
+
+    program_years: ProgramYear | null;
+    application_parents: ApplicationParent[];
+    application_scholars: ApplicationScholar[];
 }
 
-//test data
-let applications: Application[] = [
 
-    {
-        id: 1,
-        applicationNumber: "PC-2026-1187",
-        familyName: "Rodriguez",
-        submittedOn: "Oct 28, 2026",
-        programYear: "2026–2027",
-        status: "pending_review",
-        primaryEmail: "rodriguez@email.com",
-        primaryPhone: "(303) 555-1234"
-    },
-
-    {
-        id: 2,
-        applicationNumber: "PC-2026-1186",
-        familyName: "Johnson",
-        submittedOn: "Oct 28, 2026",
-        programYear: "2026–2027",
-        status: "pending_review",
-        primaryEmail: "johnson@email.com",
-        primaryPhone: "(303) 555-2345"
-    },
-
-    {
-        id: 3,
-        applicationNumber: "PC-2026-1185",
-        familyName: "Williams",
-        submittedOn: "Oct 27, 2026",
-        programYear: "2026–2027",
-        status: "under_review",
-        primaryEmail: "williams@email.com",
-        primaryPhone: "(303) 555-3456"
-    },
-
-    {
-        id: 4,
-        applicationNumber: "PC-2026-1184",
-        familyName: "Lopez",
-        submittedOn: "Oct 27, 2026",
-        programYear: "2026–2027",
-        status: "pending_review",
-        primaryEmail: "lopez@email.com",
-        primaryPhone: "(303) 555-4567"
-    },
-
-    {
-        id: 5,
-        applicationNumber: "PC-2026-1183",
-        familyName: "Garcia",
-        submittedOn: "Oct 26, 2026",
-        programYear: "2026–2027",
-        status: "approved",
-        primaryEmail: "garcia@email.com",
-        primaryPhone: "(303) 555-5678"
-    }
-];
-
-const tableBody = document.getElementById(
-    "applications-table-body"
-) as HTMLTableSectionElement;
-
-const searchInput = document.getElementById(
-    "application-search"
-) as HTMLInputElement;
-
-const statusFilter = document.getElementById(
-    "status-filter"
-) as HTMLSelectElement;
-
-const noApplications = document.getElementById(
-    "no-applications"
-) as HTMLParagraphElement;
-
-const applicationDialog = document.getElementById(
-    "application-dialog"
-) as HTMLDialogElement;
-
-const applicationDetails = document.getElementById(
-    "application-details"
-) as HTMLDivElement;
-
-const dialogApprove = document.getElementById(
-    "dialog-approve"
-) as HTMLButtonElement;
+let applications: Application[] = [];
 
 
 let selectedApplicationId: number | null = null;
 
-function escapeHTML(value: string): string {
-    return value.replace(/[&<>"']/g, character => {
-        const entities: Record<string, string> = {
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        };
+function escapeHTML(value: unknown): string {
 
-        return entities[character];
-    });
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
-function getStatusText(status: ApplicationStatus): string {
+
+
+function getStatusLabel(status: ApplicationStatus): string {
 
     switch (status) {
 
-        case "pending_review":
-            return "Pending Review";
-
+        case "waitlisted":
         case "under_review":
-            return "Under Review";
+            return "Pending Review";
 
         case "approved":
             return "Approved";
+
+        case "rejected":
+            return "Rejected";
+
+        default:
+            return status;
     }
 }
+
 
 function getStatusClass(status: ApplicationStatus): string {
 
     switch (status) {
 
-        case "pending_review":
-            return "status-pending";
-
+        case "waitlisted":
         case "under_review":
-            return "status-review";
+            return "status-pending";
 
         case "approved":
             return "status-approved";
+
+        case "rejected":
+            return "status-rejected";
+
+        default:
+            return "";
     }
 }
 
+function formatDate(date: string | null): string {
+
+    if (!date) {
+        return "N/A";
+    }
+
+    return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+    });
+}
+
+function formatBirthDate(date: string | null): string {
+
+    if (!date) {
+        return "N/A";
+    }
+
+    const parsedDate = new Date(`${date}T00:00:00`);
+
+    if (isNaN(parsedDate.getTime())) {
+        return "N/A";
+    }
+
+    return parsedDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+}
+
+
+function displayValue(value: string | null | undefined): string {
+
+    return escapeHTML(value?.trim() || "Not provided");
+}
+
+
+function yesNo(value: boolean | null): string {
+
+    if (value === null) {
+        return "Not specified";
+    }
+
+    return value ? "Yes" : "No";
+}
+
+
+
+async function fetchApplications(): Promise<Application[]> {
+
+    console.log("Starting application fetch...");
+
+    const { data, error } = await supabase
+        .from("applications")
+        .select(`
+            *,
+            program_years (
+                name
+            ),
+            application_parents (
+                *
+            ),
+            application_scholars (
+                *
+            )
+        `)
+        .neq("status", "withdrawn")
+        .order("submitted_at", {
+            ascending: false,
+            nullsFirst: false
+        });
+
+    if (error) {
+
+        console.error("SUPABASE FETCH ERROR:");
+        console.error("Message:", error.message);
+        console.error("Details:", error.details);
+        console.error("Hint:", error.hint);
+        console.error("Code:", error.code);
+
+        return [];
+
+    }
+
+    console.log("Successfully retrieved applications!");
+    console.log("Number of applications:", data?.length);
+    console.log("Application data:", data);
+
+    return (data ?? []) as unknown as Application[];
+}
+
+
 function updateStatistics(): void {
 
-    const pending = applications.filter(
-        app => app.status === "pending_review"
-    ).length;
+    const total = applications.length;
 
-    const underReview = applications.filter(
-        app => app.status === "under_review"
+    const pending = applications.filter(app =>
+        app.status === "waitlisted" ||
+        app.status === "under_review"
     ).length;
 
     const approved = applications.filter(
         app => app.status === "approved"
     ).length;
 
+    const rejected = applications.filter(
+        app => app.status === "rejected"
+    ).length;
+
+    document.getElementById("total-count")!.textContent =
+        total.toString();
+
     document.getElementById("pending-count")!.textContent =
         pending.toString();
-
-    document.getElementById("review-count")!.textContent =
-        underReview.toString();
 
     document.getElementById("approved-count")!.textContent =
         approved.toString();
 
-    document.getElementById("total-count")!.textContent =
-        applications.length.toString();
+    document.getElementById("rejected-count")!.textContent =
+        rejected.toString();
 }
+
 function displayApplications(): void {
 
-    // Get search and filter values
-    const searchValue = searchInput.value.toLowerCase().trim();
+    const tableBody = document.getElementById(
+        "applications-table-body"
+    );
+
+    const noApplications = document.getElementById(
+        "no-applications"
+    );
+
+    const searchInput = document.getElementById(
+        "application-search"
+    ) as HTMLInputElement;
+
+    const statusFilter = document.getElementById(
+        "status-filter"
+    ) as HTMLSelectElement;
+
+    if (!tableBody || !noApplications) {
+        return;
+    }
+
+    const searchValue = searchInput.value
+        .trim()
+        .toLowerCase();
 
     const selectedStatus = statusFilter.value;
 
-    // Filter applications
     const filteredApplications = applications.filter(app => {
 
         const matchesSearch =
-            app.familyName.toLowerCase().includes(searchValue) ||
-            app.applicationNumber.toLowerCase().includes(searchValue);
+            (app.family_name ?? "").toLowerCase().includes(searchValue) ||
+            (app.application_number ?? "").toLowerCase().includes(searchValue);
 
-        const matchesStatus =
-            selectedStatus === "all" ||
-            app.status === selectedStatus;
+        let matchesStatus = true;
+
+        if (selectedStatus === "pending_review") {
+
+            matchesStatus =
+                app.status === "waitlisted" ||
+                app.status === "under_review";
+
+        } else if (selectedStatus === "approved") {
+
+            matchesStatus = app.status === "approved";
+
+        } else if (selectedStatus === "rejected") {
+
+            matchesStatus = app.status === "rejected";
+        }
 
         return matchesSearch && matchesStatus;
+
     });
 
-
-  
     tableBody.innerHTML = "";
 
-    noApplications.hidden = filteredApplications.length > 0;
+    if (filteredApplications.length === 0) {
 
+        noApplications.hidden = false;
+        return;
+    }
+
+    noApplications.hidden = true;
 
     filteredApplications.forEach(app => {
 
         const row = document.createElement("tr");
 
         row.innerHTML = `
+            <td>
+                ${displayValue(app.application_number)}
+            </td>
 
-            <td>${escapeHTML(app.applicationNumber)}</td>
+            <td>
+                ${displayValue(app.family_name)}
+            </td>
 
-            <td>${escapeHTML(app.familyName)}</td>
+            <td>
+                ${formatDate(app.submitted_at)}
+            </td>
 
-            <td>${escapeHTML(app.submittedOn)}</td>
-
-            <td>${escapeHTML(app.programYear)}</td>
+            <td>
+                ${displayValue(app.program_years?.name)}
+            </td>
 
             <td>
                 <span class="status-badge ${getStatusClass(app.status)}">
-                    ${getStatusText(app.status)}
+                    ${getStatusLabel(app.status)}
                 </span>
             </td>
 
             <td>
-                <div class="action-buttons">
-
-                    <button
-                        class="view-button"
-                        data-action="view"
-                        data-id="${app.id}">
-                        View
-                    </button>
-
-                    ${
-                        app.status !== "approved"
-                        ? `
-                            <button
-                                class="approve-button"
-                                data-action="approve"
-                                data-id="${app.id}">
-                                Approve
-                            </button>
-                        `
-                        : ""
-                    }
-
-                </div>
+                <button
+                    type="button"
+                    class="view-button"
+                    data-application-id="${app.id}">
+                    View Application
+                </button>
             </td>
-
         `;
 
         tableBody.appendChild(row);
@@ -259,198 +367,663 @@ function displayApplications(): void {
 }
 
 
-function viewApplication(id: number): void {
+function displayFamilyInformation(app: Application): string {
 
-    const app = applications.find(
-        application => application.id === id
-    );
+    return `
 
-    if (!app) return;
+        <section class="detail-section">
 
-    selectedApplicationId = id;
+            <h3>Family Information</h3>
 
-    applicationDetails.innerHTML = `
+            <div class="detail-grid">
 
-        <div class="application-detail">
-            <strong>Application Number</strong>
-            ${escapeHTML(app.applicationNumber)}
-        </div>
+                <div class="detail-field">
+                    <span>Family Name</span>
+                    <strong>${displayValue(app.family_name)}</strong>
+                </div>
 
-        <div class="application-detail">
-            <strong>Family Name</strong>
-            ${escapeHTML(app.familyName)}
-        </div>
+                <div class="detail-field">
+                    <span>Application Type</span>
+                    <strong>
+                        ${app.application_type === "new_family"
+                            ? "New Family"
+                            : "Returning Family"}
+                    </strong>
+                </div>
 
-        <div class="application-detail">
-            <strong>Primary Email</strong>
-            ${escapeHTML(app.primaryEmail)}
-        </div>
+                <div class="detail-field">
+                    <span>Primary Email</span>
+                    <strong>${displayValue(app.primary_email)}</strong>
+                </div>
 
-        <div class="application-detail">
-            <strong>Primary Phone</strong>
-            ${escapeHTML(app.primaryPhone)}
-        </div>
+                <div class="detail-field">
+                    <span>Primary Phone</span>
+                    <strong>${displayValue(app.primary_phone)}</strong>
+                </div>
 
-        <div class="application-detail">
-            <strong>Submitted On</strong>
-            ${escapeHTML(app.submittedOn)}
-        </div>
+                <div class="detail-field">
+                    <span>Address Line 1</span>
+                    <strong>${displayValue(app.address_line1)}</strong>
+                </div>
 
-        <div class="application-detail">
-            <strong>Program Year</strong>
-            ${escapeHTML(app.programYear)}
-        </div>
+                <div class="detail-field">
+                    <span>Address Line 2</span>
+                    <strong>${displayValue(app.address_line2)}</strong>
+                </div>
 
-        <div class="application-detail">
-            <strong>Application Status</strong>
-            ${getStatusText(app.status)}
-        </div>
+                <div class="detail-field">
+                    <span>City</span>
+                    <strong>${displayValue(app.city)}</strong>
+                </div>
+
+                <div class="detail-field">
+                    <span>State</span>
+                    <strong>${displayValue(app.state)}</strong>
+                </div>
+
+                <div class="detail-field">
+                    <span>ZIP Code</span>
+                    <strong>${displayValue(app.zip_code)}</strong>
+                </div>
+
+                <div class="detail-field">
+                    <span>County</span>
+                    <strong>${displayValue(app.county)}</strong>
+                </div>
+
+            </div>
+
+        </section>
 
     `;
-    dialogApprove.hidden = app.status === "approved";
+}
 
-    applicationDialog.showModal();
+function displayParentInformation(app: Application): string {
+
+    if (!app.application_parents ||
+        app.application_parents.length === 0) {
+
+        return `
+            <section class="detail-section">
+                <h3>Parent / Guardian Information</h3>
+                <p class="empty-detail">
+                    No parent/guardian information found.
+                </p>
+            </section>
+        `;
+    }
+
+    const parentCards = app.application_parents.map(
+        (parent, index) => {
+
+            return `
+
+                <div class="person-card">
+
+                    <h4>
+                        Parent / Guardian ${index + 1}
+                    </h4>
+
+                    <div class="detail-grid">
+
+                        <div class="detail-field">
+                            <span>First Name</span>
+                            <strong>${displayValue(parent.first_name)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Last Name</span>
+                            <strong>${displayValue(parent.last_name)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Email</span>
+                            <strong>${displayValue(parent.email)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Phone</span>
+                            <strong>${displayValue(parent.phone)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Relationship to Scholar</span>
+                            <strong>${displayValue(parent.relationship_to_scholar)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Preferred Language</span>
+                            <strong>${displayValue(parent.preferred_language)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Race / Ethnicity</span>
+                            <strong>${displayValue(parent.ethnicity)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Education Level</span>
+                            <strong>${displayValue(parent.education_level)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Employer</span>
+                            <strong>${displayValue(parent.employer)}</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="application-selections">
+
+                        <div>
+                            <span>Primary Contact</span>
+                            <strong>${yesNo(parent.is_primary)}</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    ).join("");
+
+    return `
+
+        <section class="detail-section">
+
+            <h3>Parent / Guardian Information</h3>
+
+            ${parentCards}
+
+        </section>
+
+    `;
+}
+
+
+function displayScholarInformation(app: Application): string {
+
+    if (!app.application_scholars ||
+        app.application_scholars.length === 0) {
+
+        return `
+            <section class="detail-section">
+                <h3>Scholar Information</h3>
+                <p class="empty-detail">
+                    No scholar information found.
+                </p>
+            </section>
+        `;
+    }
+
+    const scholarCards = app.application_scholars.map(
+        (scholar, index) => {
+
+            return `
+
+                <div class="person-card">
+
+                    <h4>Scholar ${index + 1}</h4>
+
+                    <div class="detail-grid">
+
+                        <div class="detail-field">
+                            <span>First Name</span>
+                            <strong>${displayValue(scholar.first_name)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Last Name</span>
+                            <strong>${displayValue(scholar.last_name)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Date of Birth</span>
+                            <strong>${formatBirthDate(scholar.date_of_birth)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Grade Level</span>
+                            <strong>${displayValue(scholar.grade_level)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>School Type</span>
+                            <strong>${displayValue(scholar.school_type)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>School Name</span>
+                            <strong>${displayValue(scholar.school_name)}</strong>
+                        </div>
+
+                        <div class="detail-field">
+                            <span>Race / Ethnicity</span>
+                            <strong>${displayValue(scholar.ethnicity)}</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="application-selections">
+
+                        <div>
+                            <span>Applying for Scholarship</span>
+                            <strong>${yesNo(scholar.applying_for_scholarship)}</strong>
+                        </div>
+
+                        <div>
+                            <span>Applying for Grant</span>
+                            <strong>${yesNo(scholar.applying_for_grant)}</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    ).join("");
+
+    return `
+
+        <section class="detail-section">
+
+            <h3>Scholar Information</h3>
+
+            ${scholarCards}
+
+        </section>
+
+    `;
+}
+
+//app pop up
+
+function displayApplicationDetails(app: Application): void {
+
+    selectedApplicationId = app.id;
+
+    const dialog = document.getElementById(
+        "application-dialog"
+    ) as HTMLDialogElement;
+
+    const details = document.getElementById(
+        "application-details"
+    );
+
+    const applicationNumber = document.getElementById(
+        "dialog-application-number"
+    );
+
+    const approveButton = document.getElementById(
+        "dialog-approve"
+    ) as HTMLButtonElement;
+
+    const rejectButton = document.getElementById(
+        "dialog-reject"
+    ) as HTMLButtonElement;
+
+    if (!dialog || !details || !applicationNumber) {
+        return;
+    }
+
+    applicationNumber.textContent =
+        app.application_number ?? "Application #" + app.id;
+
+    const summary = `
+
+        <section class="application-summary">
+
+            <div>
+                <span>Application Status</span>
+                <strong>
+                    <span class="status-badge ${getStatusClass(app.status)}">
+                        ${getStatusLabel(app.status)}
+                    </span>
+                </strong>
+            </div>
+
+            <div>
+                <span>Program Year</span>
+                <strong>${displayValue(app.program_years?.name)}</strong>
+            </div>
+
+            <div>
+                <span>Submitted On</span>
+                <strong>${formatDate(app.submitted_at)}</strong>
+            </div>
+
+        </section>
+
+    `;
+
+    details.innerHTML = `
+
+        ${summary}
+
+        ${displayFamilyInformation(app)}
+
+        ${displayParentInformation(app)}
+
+        ${displayScholarInformation(app)}
+
+    `;
+
+    const isPending =
+        app.status === "waitlisted" ||
+        app.status === "under_review";
+
+    approveButton.disabled = !isPending;
+    rejectButton.disabled = !isPending;
+
+    approveButton.hidden = !isPending;
+    rejectButton.hidden = !isPending;
+
+    if (!dialog.open) {
+        dialog.showModal();
+    }
 
 }
 
-function approveApplication(id: number): void {
 
-    const app = applications.find(
-        application => application.id === id
-    );
+async function updateApplicationStatus(
+    newStatus: "approved" | "rejected"
+): Promise<void> {
 
-    if (!app || app.status === "approved") return;
-
-    const confirmed = window.confirm(
-        `Are you sure you want to approve application ${app.applicationNumber}?`
-    );
-
-    if (!confirmed) return;
-
-    app.status = "approved";
-
-  
-    updateStatistics();
-    displayApplications();
-
-   
-    if (applicationDialog.open) {
-        applicationDialog.close();
+    if (selectedApplicationId === null) {
+        return;
     }
+
+    const application = applications.find(
+        app => app.id === selectedApplicationId
+    );
+
+    if (!application) {
+        return;
+    }
+    if (
+        application.status !== "waitlisted" &&
+        application.status !== "under_review"
+    ) {
+        alert("This application has already been reviewed.");
+        return;
+    }
+
+    const decision = newStatus === "approved"
+        ? "approve"
+        : "reject";
+
+    const confirmed = confirm(
+        `Are you sure you want to ${decision} this application?`
+    );
+
+    if (!confirmed) {
+        return;
+    }
+    const {
+        data: { user },
+        error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        console.error("Unable to identify reviewer:", userError);
+        alert("Unable to identify the logged-in user.");
+        return;
+    }
+
+    const { data, error } = await supabase
+        .from("applications")
+        .update({
+
+            status: newStatus,
+
+            reviewed_at: new Date().toISOString(),
+
+            reviewed_by: user.id
+
+        })
+        .eq("id", selectedApplicationId)
+        .in("status", ["waitlisted", "under_review"])
+        .select("id")
+        .maybeSingle();
+
+    if (error) {
+
+        console.error("Error updating application:", error);
+
+        alert("Unable to update the application. Please try again.");
+
+        return;
+    }
+
+    if (!data) {
+
+        alert(
+            "The application was not updated. It may have already been reviewed or you may not have permission."
+        );
+
+        await loadApplications();
+
+        return;
+    }
+
+    alert(
+        `Application successfully ${newStatus}.`
+    );
+
+    const dialog = document.getElementById(
+        "application-dialog"
+    ) as HTMLDialogElement;
+
+    dialog.close();
 
     selectedApplicationId = null;
 
-    window.alert("Application successfully approved.");
+    await loadApplications();
 
 }
 
+async function loadApplications(): Promise<void> {
 
-tableBody.addEventListener("click", (event: MouseEvent) => {
+    const tableBody = document.getElementById(
+        "applications-table-body"
+    );
 
-    const target = event.target;
+    if (tableBody) {
 
-    if (!(target instanceof Element)) return;
-
-    const button = target.closest("button[data-action]");
-
-    if (!(button instanceof HTMLButtonElement)) return;
-
-    const id = Number(button.dataset.id);
-
-    const action = button.dataset.action;
-
-    if (action === "view") {
-
-        viewApplication(id);
-
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    Loading applications...
+                </td>
+            </tr>
+        `;
     }
 
-    else if (action === "approve") {
+    applications = await fetchApplications();
 
-        approveApplication(id);
+    updateStatistics();
 
-    }
-
-});
-
-
-dialogApprove.addEventListener("click", () => {
-
-    if (selectedApplicationId !== null) {
-        approveApplication(selectedApplicationId);
-    }
-
-});
-
-
-document.getElementById("close-dialog")!.addEventListener(
-    "click",
-    () => applicationDialog.close()
-);
-
-
-document.getElementById("dialog-close")!.addEventListener(
-    "click",
-    () => applicationDialog.close()
-);
-
-searchInput.addEventListener("input", () => {
     displayApplications();
-});
+
+}
+
+document.getElementById("application-search")
+    ?.addEventListener("input", () => {
+
+        displayApplications();
+
+    });
+
+document.getElementById("status-filter")
+    ?.addEventListener("change", () => {
+
+        displayApplications();
+
+    });
 
 
-statusFilter.addEventListener("change", () => {
-    displayApplications();
-});
+document.getElementById("applications-table-body")
+    ?.addEventListener("click", (event) => {
 
+        const target = event.target as HTMLElement;
 
-document.getElementById("export-button")!.addEventListener(
-    "click",
-    () => {
+        const button = target.closest(
+            ".view-button"
+        ) as HTMLButtonElement | null;
 
-        const headers = [
-            "Application Number",
-            "Family Name",
-            "Submitted On",
-            "Program Year",
-            "Status"
-        ];
+        if (!button) {
+            return;
+        }
 
-        const rows = applications.map(app => [
-            app.applicationNumber,
-            app.familyName,
-            app.submittedOn,
-            app.programYear,
-            getStatusText(app.status)
-        ]);
-
-        const csvContent = [
-            headers,
-            ...rows
-        ].map(row =>
-            row.map(value =>
-                `"${String(value).replace(/"/g, '""')}"`
-            ).join(",")
-        ).join("\n");
-
-        const blob = new Blob(
-            [csvContent],
-            { type: "text/csv;charset=utf-8;" }
+        const applicationId = Number(
+            button.dataset.applicationId
         );
 
-        const url = URL.createObjectURL(blob);
+        const application = applications.find(
+            app => app.id === applicationId
+        );
 
-        const link = document.createElement("a");
+        if (!application) {
+            return;
+        }
 
-        link.href = url;
-        link.download = "pending-applications.csv";
+        displayApplicationDetails(application);
 
-        link.click();
+    });
 
-        URL.revokeObjectURL(url);
+document.getElementById("dialog-approve")
+    ?.addEventListener("click", async () => {
+
+        await updateApplicationStatus("approved");
+
+    });
+
+document.getElementById("dialog-reject")
+    ?.addEventListener("click", async () => {
+
+        await updateApplicationStatus("rejected");
+
+    });
+
+document.getElementById("close-dialog")
+    ?.addEventListener("click", () => {
+
+        const dialog = document.getElementById(
+            "application-dialog"
+        ) as HTMLDialogElement;
+
+        dialog.close();
+
+        selectedApplicationId = null;
+
+    });
+
+document.getElementById("dialog-close")
+    ?.addEventListener("click", () => {
+
+        const dialog = document.getElementById(
+            "application-dialog"
+        ) as HTMLDialogElement;
+
+        dialog.close();
+
+        selectedApplicationId = null;
+
+    });
+
+document.getElementById("application-dialog")
+    ?.addEventListener("click", (event) => {
+
+        const dialog = event.currentTarget as HTMLDialogElement;
+
+        if (event.target === dialog) {
+
+            dialog.close();
+
+            selectedApplicationId = null;
+
+        }
+
+    });
+
+document.getElementById("export-button")
+    ?.addEventListener("click", () => {
+
+        exportApplications();
+
+    });
+
+
+function exportApplications(): void {
+
+    const headers = [
+        "Application Number",
+        "Family Name",
+        "Primary Email",
+        "Primary Phone",
+        "Program Year",
+        "Application Type",
+        "Submitted On",
+        "Status"
+    ];
+
+    const rows = applications.map(app => [
+
+        app.application_number ?? "",
+        app.family_name,
+        app.primary_email,
+        app.primary_phone ?? "",
+        app.program_years?.name ?? "",
+        app.application_type,
+        app.submitted_at ?? "",
+        getStatusLabel(app.status)
+
+    ]);
+
+    function escapeCSV(value: string): string {
+
+        return `"${String(value).replace(/"/g, '""')}"`;
 
     }
-);
 
-updateStatistics();
-displayApplications();
+    const csvContent = [
+
+        headers.map(escapeCSV).join(","),
+
+        ...rows.map(row =>
+            row.map(value => escapeCSV(String(value))).join(",")
+        )
+
+    ].join("\n");
+
+    const blob = new Blob(
+        [csvContent],
+        { type: "text/csv;charset=utf-8;" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = "applications.csv";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await loadApplications();
+
+});
+
+const { data: { session }, error } =
+    await supabase.auth.getSession();
