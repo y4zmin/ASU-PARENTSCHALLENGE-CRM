@@ -70,6 +70,9 @@ let staffRecords: StaffRecord[] = []
 // required hours of learning
 const requiredHours = 12
 
+// which box is picked: 'all', 'complete', or 'in-progress'
+let cardFilter = 'all'
+
 // title and intro at the top of the tab
 const titleAndIntro = `
   <h2 class="attendance-title">Attendance</h2>
@@ -243,6 +246,49 @@ function filterFamilies(summaries: FamilySummary[], query: string): FamilySummar
   return matches
 }
 
+// keeps only the families that match the box that was clicked
+function filterByCard(summaries: FamilySummary[]): FamilySummary[] {
+  if (cardFilter === 'all') {
+    return summaries
+  }
+
+  const matches: FamilySummary[] = []
+  for (const summary of summaries) {
+    const isComplete = summary.hours >= requiredHours
+
+    if (cardFilter === 'complete' && isComplete) {
+      matches.push(summary)
+    }
+    if (cardFilter === 'in-progress' && !isComplete) {
+      matches.push(summary)
+    }
+  }
+
+  return matches
+}
+
+// adds 'active' to the box that matches the current filter, so it looks selected
+function cardClass(filter: string): string {
+  if (cardFilter === filter) {
+    return 'staff-card clickable active'
+  }
+  return 'staff-card clickable'
+}
+
+// runs when a box is clicked; clicking the same box again shows all families
+function handleCardClick(event: Event): void {
+  const clickedCard = event.currentTarget as HTMLButtonElement
+  const filter = clickedCard.dataset.filter!
+
+  if (cardFilter === filter) {
+    cardFilter = 'all'
+  } else {
+    cardFilter = filter
+  }
+
+  yearChange()
+}
+
 // builds summary cards at top
 function buildSummaryCards(summaries: FamilySummary[]): string {
   let completed = 0
@@ -259,18 +305,18 @@ function buildSummaryCards(summaries: FamilySummary[]): string {
 
   return `
     <div class="staff-cards">
-      <div class="staff-card">
+      <button type="button" class="${cardClass('all')}" data-filter="all">
         <p class="staff-card-label">Families Attending</p>
         <p class="staff-card-number">${summaries.length}</p>
-      </div>
-      <div class="staff-card">
+      </button>
+      <button type="button" class="${cardClass('complete')}" data-filter="complete">
         <p class="staff-card-label">Completed ${requiredHours} Hours</p>
         <p class="staff-card-number">${completed}</p>
-      </div>
-      <div class="staff-card">
+      </button>
+      <button type="button" class="${cardClass('in-progress')}" data-filter="in-progress">
         <p class="staff-card-label">Still Working Toward ${requiredHours}</p>
         <p class="staff-card-number">${inProgress}</p>
-      </div>
+      </button>
       <div class="staff-card">
         <p class="staff-card-label">Total Family Hours</p>
         <p class="staff-card-number">${totalHours}</p>
@@ -327,10 +373,10 @@ function showYear(year: string): void {
 
   // only the families that match the search
   const query = document.querySelector<HTMLInputElement>('#staff-attendance-search')!.value
-  const filtered = filterFamilies(summaries, query)
+  const filtered = filterFamilies(filterByCard(summaries), query)
 
   let resultsLine = ''
-  if (query.trim()) {
+  if (query.trim() || cardFilter !== 'all') {
     resultsLine = '<p class="search-results">Showing ' + filtered.length + ' of ' + summaries.length + ' families</p>'
   }
 
@@ -360,6 +406,12 @@ function showYear(year: string): void {
       </table>
     </div>
   `
+
+  //make boxes clickable
+  const cards = yearContent.querySelectorAll<HTMLButtonElement>('.staff-card.clickable')
+  for (const card of cards) {
+    card.addEventListener('click', handleCardClick)
+  }
 }
 
 // runs when a different year is picked

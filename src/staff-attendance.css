@@ -91,3 +91,24 @@ Table, toolbar, and dropdown styles come from attendance.css.
 #staff-attendance-search {
   width: 215px;
 }
+
+/* boxes that filter the table when clicked (buildSummaryCards) */
+.staff-card.clickable {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.staff-card.clickable:hover {
+  border-color: #394761;
+}
+
+.staff-card.clickable.active {
+  border: 2px solid #394761;
+  background-color: #e8ecf3;
+}
+
+/* space between the "Showing ... families" line and the table (showYear) */
+#staff-attendance-section .search-results {
+  margin: 0 0 12px;
+}
