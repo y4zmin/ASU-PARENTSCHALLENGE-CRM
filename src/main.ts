@@ -43,7 +43,7 @@ form.addEventListener('submit', async (event) => {
   if (profile.active_role === 'admin') {
     window.location.href = '/parent-dashboard.html'
   } else if (profile.active_role === 'staff') {
-    window.location.href = '/parent-dashboard.html'
+    window.location.href = '/staff-dashboard.html'
   } else {
     window.location.href = '/parent-dashboard.html'
   }
