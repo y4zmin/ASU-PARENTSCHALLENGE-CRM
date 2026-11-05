@@ -5,6 +5,7 @@ and how close they are to the 12 hours they need.
 */
 
 import './attendance.css'
+import { supabase } from './supabase'
 
 // empty box in html where the attendance tab goes; '!' at end to say box is always on page
 const section = document.querySelector<HTMLElement>('#attendance-section')!
@@ -17,88 +18,164 @@ interface AttendanceRecord {
   programYear: string
   sessionTitle: string
   sessionType: string
+  typeColor: string
   sessionDate: string
   startTime: string
   endTime: string
   attendees: string[]
+  mandatory: boolean
 }
 
-// sample data for now, will come from supabase later
-const attendanceRecords: AttendanceRecord[] = [
-  {
-    programYear: '2026-2027',
-    sessionTitle: 'Session 1',
-    sessionType: 'Lunch & Learn',
-    sessionDate: '2026-10-06',
-    startTime: '12:00',
-    endTime: '13:00',
-    attendees: ['Vanessa Aniston (Parent)', 'Jake Aniston (Scholar)'],
-  },
-  {
-    programYear: '2026-2027',
-    sessionTitle: 'Session 2',
-    sessionType: 'In-person',
-    sessionDate: '2026-09-22',
-    startTime: '18:00',
-    endTime: '20:00',
-    attendees: ['Vanessa Aniston (Parent)', 'Maria Lopez (Guest)'],
-  },
-  {
-    programYear: '2026-2027',
-    sessionTitle: 'Session 3',
-    sessionType: 'Mandatory',
-    sessionDate: '2026-08-25',
-    startTime: '17:00',
-    endTime: '19:00',
-    attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
-  },
-  {
-    programYear: '2025-2026',
-    sessionTitle: 'Session 4',
-    sessionType: 'In-person',
-    sessionDate: '2026-04-14',
-    startTime: '18:00',
-    endTime: '21:00',
-    attendees: ['Vanessa Aniston (Parent)', 'Jake Aniston (Scholar)'],
-  },
-  {
-    programYear: '2025-2026',
-    sessionTitle: 'Session 5',
-    sessionType: 'Community event',
-    sessionDate: '2026-03-21',
-    startTime: '11:00',
-    endTime: '14:00',
-    attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)', 'Jake Aniston (Scholar)', 'Alice Aniston (Scholar)'],
-  },
-  {
-    programYear: '2025-2026',
-    sessionTitle: 'Session 6',
-    sessionType: 'In-person',
-    sessionDate: '2025-11-18',
-    startTime: '18:00',
-    endTime: '21:00',
-    attendees: ['Vanessa Aniston (Parent)'],
-  },
-  {
-    programYear: '2025-2026',
-    sessionTitle: 'Session 7',
-    sessionType: 'Mandatory',
-    sessionDate: '2025-08-26',
-    startTime: '17:00',
-    endTime: '20:00',
-    attendees: ['Vanessa Aniston (Parent)', 'Daniel Aniston (Parent)'],
-  },
-]
+// a parent or scholar's name
+interface PersonName {
+  first_name: string
+  last_name: string
+}
 
-// color for each session type
-const sessionTypeColors: Record<string, string> = {
-  'In-person': '#4A90D9',
-  'Lunch & Learn': '#F5A623',
-  'Virtual': '#7ED321',
-  'Community event': '#9013FE',
-  'Mandatory': '#D0021B',
-  'Platinum': '#8B8B8B',
-  'Other': '#4A4A4A',
+// one person at a session (attendance_members table)
+interface AttendeeRow {
+  attendee_type: string
+  display_name: string | null
+  attendance_status: string | null
+  parents: PersonName | null
+  scholars: PersonName | null
+}
+
+// session_types table
+interface SessionTypeRow {
+  name: string
+  color_code: string
+}
+
+// program_years table
+interface ProgramYearRow {
+  name: string
+}
+
+// sessions table
+interface SessionRow {
+  title: string
+  session_date: string
+  start_time: string
+  end_time: string
+  is_mandatory: boolean
+  session_types: SessionTypeRow | null
+  program_years: ProgramYearRow | null
+}
+
+// one attendance row with everything connected to it
+interface AttendanceRow {
+  sessions: SessionRow | null
+  attendance_members: AttendeeRow[]
+}
+
+// filled in from supabase when the page loads
+let attendanceRecords: AttendanceRecord[] = []
+
+// get each person's name with who they are
+function getAttendeeName(member: AttendeeRow): string {
+  if (member.attendee_type === 'parent' && member.parents) {
+    return member.parents.first_name + ' ' + member.parents.last_name + ' (Parent)'
+  }
+
+  if (member.attendee_type === 'scholar' && member.scholars) {
+    return member.scholars.first_name + ' ' + member.scholars.last_name + ' (Scholar)'
+  }
+
+  if (member.display_name) {
+    return member.display_name + ' (Guest)'
+  }
+
+  return 'Unknown'
+}
+
+function toAttendanceRecord(row: AttendanceRow): AttendanceRecord | null {
+  // skip this row if the session didn't come back
+  if (!row.sessions) {
+    return null
+  }
+
+  const session = row.sessions
+
+  // names of everyone who came
+  const attendees: string[] = []
+  for (const member of row.attendance_members) {
+    if (member.attendance_status === 'attended') {
+      attendees.push(getAttendeeName(member))
+    }
+  }
+
+  // grey dot if the session has no type
+  let typeName = 'Other'
+  let typeColor = '#999999'
+  if (session.session_types) {
+    typeName = session.session_types.name
+    typeColor = session.session_types.color_code
+  }
+
+  let programYear = ''
+  if (session.program_years) {
+    programYear = session.program_years.name
+  }
+
+  return {
+    programYear: programYear,
+    sessionTitle: session.title,
+    sessionType: typeName,
+    typeColor: typeColor,
+    sessionDate: session.session_date,
+    startTime: session.start_time,
+    endTime: session.end_time,
+    attendees: attendees,
+    mandatory: session.is_mandatory,
+  }
+}
+
+// puts newer sessions first
+function newestFirst(a: AttendanceRecord, b: AttendanceRecord): number {
+  if (a.sessionDate < b.sessionDate) {
+    return 1
+  }
+  if (a.sessionDate > b.sessionDate) {
+    return -1
+  }
+  return 0
+}
+
+// gets the family's attendance from supabase; RLS only sends back their own family's rows
+async function loadAttendance(): Promise<AttendanceRecord[] | null> {
+  const { data, error } = await supabase
+    .from('attendance')
+    .select(`
+      sessions (
+        title, session_date, start_time, end_time, is_mandatory,
+        session_types ( name, color_code ),
+        program_years ( name )
+      ),
+      attendance_members (
+        attendee_type, display_name, attendance_status,
+        parents ( first_name, last_name ),
+        scholars ( first_name, last_name )
+      )
+    `)
+    .eq('attendance_status', 'present')
+
+  if (error) {
+    console.error('Could not load attendance:', error.message)
+    return null
+  }
+
+  const records: AttendanceRecord[] = []
+  
+  for (const row of data as unknown as AttendanceRow[]) {
+    const record = toAttendanceRecord(row)
+    if (record) {
+      records.push(record)
+    }
+  }
+
+  records.sort(newestFirst)
+  return records
 }
 
 // helper function for formatting date better
@@ -124,13 +201,18 @@ function buildTableRows(records: AttendanceRecord[]): string {
   let rows = ''
 
   for (const record of records) {
+    let mandatoryTag = ''
+    if (record.mandatory) {
+      mandatoryTag = '<span class="mandatory-tag">Mandatory</span>'
+    }
     rows += `
       <tr>
         <td>${formatDate(record.sessionDate)}</td>
         <td>${record.sessionTitle}</td>
         <td>
-          <span class="type-dot" style="background-color: ${sessionTypeColors[record.sessionType]};"></span>
+          <span class="type-dot" style="background-color: ${record.typeColor};"></span>
           ${record.sessionType}
+          ${mandatoryTag}
         </td>
         <td>${record.attendees.join(', ')}</td>
         <td class="hours-cell">${getHours(record)}</td>
@@ -252,34 +334,13 @@ function filterRecords(records: AttendanceRecord[], query: string): AttendanceRe
   )
 }
 
-// every program year in the data
-const programYears = getProgramYears()
-
-// title, description, year dropdown, search box, and empty spot for content
-section.innerHTML = `
+// title and intro at the top of the tab
+const titleAndIntro = `
   <h2 class="attendance-title">Attendance History</h2>
   <p class="attendance-intro">
     Track the sessions you and your family have attended
     and your progress toward the required 12 hours of learning.
   </p>
-
-  <div class="year-filter">
-    <label for="year-select">Program year</label>
-    <select id="year-select">
-      ${yearOptions(programYears)}
-    </select>
-  </div>
-
-  <div class="attendance-controls">
-    <input
-      id="attendance-search"
-      type="search"
-      placeholder="Search sessions or attendees"
-      aria-label="Search attendance records"
-    />
-  </div>
-
-  <div id="year-content"></div>
 `
 
 // shows hours progress and sessions table for one program year
@@ -292,8 +353,23 @@ function showYear(year: string): void {
 
   const rows = buildTableRows(filteredRecords)
 
+  let resultsLine = ''
+  if (query) {
+    const matchedHours = getTotalHours(filteredRecords)
+
+    let hourWord = 'hours'
+    if (matchedHours === 1) {
+      hourWord = 'hour'
+    }
+
+    resultsLine = '<p class="search-results">Showing ' + filteredRecords.length + ' of ' + yearRecords.length +
+      ' sessions · ' + matchedHours + ' ' + hourWord + '</p>'
+
+  }
+
   yearContent.innerHTML = `
-    ${buildProgressSection(filteredRecords)}
+    ${buildProgressSection(yearRecords)}
+    ${resultsLine}
 
     <div class="table-wrapper">
       <table class="attendance-table">
@@ -318,26 +394,64 @@ function showYear(year: string): void {
   `
 }
 
-// show newest year when page first loads
-showYear(programYears[0])
-
-// program year dropdown
-const selectYear = document.querySelector<HTMLSelectElement>('#year-select')!
-
-// runs when different year is picked
+// runs when a different year is picked or the search changes
 function yearChange(): void {
+  const selectYear = document.querySelector<HTMLSelectElement>('#year-select')!
   showYear(selectYear.value)
 }
 
-// run the yearChange whenever dropdown changes
-selectYear.addEventListener('change', yearChange)
+// loads attendance from supabase, then fills in the tab
+async function startAttendanceTab(): Promise<void> {
+  section.innerHTML = titleAndIntro + '<p class="attendance-intro">Loading attendance...</p>'
 
-// live search
-const searchInput = document.querySelector<HTMLInputElement>('#attendance-search')
+  const records = await loadAttendance()
 
-searchInput?.addEventListener('input', () => {
-  showYear(selectYear.value)
-})
+  // if loading from supabase failed, show an error message  
+  if (records === null) {
+    section.innerHTML = titleAndIntro + '<p class="empty-state">Could not load your attendance right now. Please try again later.</p>'
+    return
+  }
+
+  attendanceRecords = records
+  const programYears = getProgramYears()
+
+  // no sessions attended yet
+  if (programYears.length === 0) {
+    section.innerHTML = titleAndIntro + buildProgressSection([]) +
+      '<p class="empty-state">No sessions recorded yet. Sessions you attend will show up here.</p>'
+    return
+  }
+
+  // year dropdown, search box, and empty spot for content
+  section.innerHTML = titleAndIntro + `
+    <div class="attendance-toolbar">
+      <div class="year-filter">
+        <label for="year-select">Program year</label>
+        <select id="year-select">
+          ${yearOptions(programYears)}
+        </select>
+      </div>
+
+      <div class="attendance-controls">
+        <input
+          id="attendance-search"
+          type="search"
+          placeholder="Search sessions or attendees"
+          aria-label="Search attendance records"
+        />
+      </div>
+    </div>
+
+    <div id="year-content"></div>
+  `
+
+  // show newest year first
+  showYear(programYears[0])
+
+  // update the table when the year or search changes
+  document.querySelector<HTMLSelectElement>('#year-select')!.addEventListener('change', yearChange)
+  document.querySelector<HTMLInputElement>('#attendance-search')!.addEventListener('input', yearChange)
+}
 
 // runs when nav link clicked
 function handleNavClick(event: Event): void {
@@ -361,3 +475,6 @@ if (window.location.hash === '#attendance') {
 } else {
   showAttendance(false)
 }
+
+// load the data and fill in the tab
+startAttendanceTab()
