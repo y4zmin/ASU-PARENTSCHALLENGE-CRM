@@ -24,6 +24,7 @@ interface StaffRecord {
   startTime: string
   endTime: string
   mandatory: boolean
+  attendeeCount: number
 }
 
 // one family's totals for a program year
@@ -31,6 +32,7 @@ interface FamilySummary {
   familyName: string
   sessionCount: number
   hours: number
+  instructionalHours: number
   mandatoryDone: boolean
 }
 
@@ -58,10 +60,16 @@ interface RegistrationRow {
   families: FamilyRow | null
 }
 
+// one person at a session
+interface AttendeeRow {
+  attendance_status: string | null
+}
+
 // one attendance row with everything connected to it
 interface AttendanceRow {
   sessions: SessionRow | null
   registrations: RegistrationRow | null
+  attendance_members: AttendeeRow[]
 }
 
 // filled in from supabase when the page loads
@@ -100,6 +108,14 @@ function toStaffRecord(row: AttendanceRow): StaffRecord | null {
     programYear = session.program_years.name
   }
 
+  //how many people from family came
+  let attendeeCount = 0
+  for (const member of row.attendance_members) {
+    if (member.attendance_status === 'attended') {
+      attendeeCount += 1
+    }
+  }
+
   return {
     programYear: programYear,
     familyName: familyName,
@@ -107,6 +123,7 @@ function toStaffRecord(row: AttendanceRow): StaffRecord | null {
     startTime: session.start_time,
     endTime: session.end_time,
     mandatory: session.is_mandatory,
+    attendeeCount: attendeeCount,
   }
 }
 
@@ -132,7 +149,8 @@ async function loadStaffAttendance(): Promise<StaffRecord[] | null> {
       ),
       registrations (
         families ( family_name )
-      )
+      ),
+      attendance_members ( attendance_status )
     `)
     .eq('attendance_status', 'present')
 
@@ -207,12 +225,13 @@ function getFamilySummaries(year: string): FamilySummary[] {
     }
 
     if (!summary) {
-      summary = { familyName: record.familyName, sessionCount: 0, hours: 0, mandatoryDone: false }
+      summary = { familyName: record.familyName, sessionCount: 0, hours: 0, instructionalHours: 0, mandatoryDone: false }
       summaries.push(summary)
     }
 
     summary.sessionCount += 1
     summary.hours += getHours(record)
+    summary.instructionalHours += getHours(record) * record.attendeeCount
 
     if (record.mandatory) {
       summary.mandatoryDone = true
@@ -292,13 +311,13 @@ function handleCardClick(event: Event): void {
 // builds summary cards at top
 function buildSummaryCards(summaries: FamilySummary[]): string {
   let completed = 0
-  let totalHours = 0
+  let instructionalHours = 0
 
   for (const summary of summaries) {
     if(summary.hours >= requiredHours) {
       completed += 1
     }
-    totalHours += summary.hours
+    instructionalHours += summary.instructionalHours
   }
 
   const inProgress = summaries.length - completed
@@ -314,12 +333,12 @@ function buildSummaryCards(summaries: FamilySummary[]): string {
         <p class="staff-card-number">${completed}</p>
       </button>
       <button type="button" class="${cardClass('in-progress')}" data-filter="in-progress">
-        <p class="staff-card-label">Still Working Toward ${requiredHours}</p>
+        <p class="staff-card-label">Under ${requiredHours} Hours</p>
         <p class="staff-card-number">${inProgress}</p>
       </button>
       <div class="staff-card">
-        <p class="staff-card-label">Total Family Hours</p>
-        <p class="staff-card-number">${totalHours}</p>
+        <p class="staff-card-label">Total Instructional Hours</p>
+        <p class="staff-card-number">${instructionalHours}</p>
       </div>
     </div>
   `
