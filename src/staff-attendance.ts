@@ -11,6 +11,7 @@ import { supabase } from './supabase'
 // empty box in html where the staff attendance tab goes; '!' at end to say box is always on page
 const staffSection = document.querySelector<HTMLElement>('#staff-attendance-section')!
 
+// session dashboard hidden while the attendance tab is open
 const sessionDashboard = document.querySelector<HTMLElement>('#events-dashboard')!
 
 // all links in nav bar
@@ -27,12 +28,12 @@ interface StaffRecord {
   attendeeCount: number
 }
 
-// one family's totals for a program year
+// one family's totals for a program year; kept in minutes so times like 1 hour 20 minutes add up exactly
 interface FamilySummary {
   familyName: string
   sessionCount: number
-  hours: number
-  instructionalHours: number
+  minutes: number
+  instructionalMinutes: number
   mandatoryDone: boolean
 }
 
@@ -60,7 +61,7 @@ interface RegistrationRow {
   families: FamilyRow | null
 }
 
-// one person at a session
+// one person at a session (attendance_members table)
 interface AttendeeRow {
   attendance_status: string | null
 }
@@ -75,8 +76,9 @@ interface AttendanceRow {
 // filled in from supabase when the page loads
 let staffRecords: StaffRecord[] = []
 
-// required hours of learning
+// required hours of learning, and the same in minutes
 const requiredHours = 12
+const requiredMinutes = requiredHours * 60
 
 // which box is picked: 'all', 'complete', or 'in-progress'
 let cardFilter = 'all'
@@ -108,7 +110,7 @@ function toStaffRecord(row: AttendanceRow): StaffRecord | null {
     programYear = session.program_years.name
   }
 
-  //how many people from family came
+  // how many people from the family came
   let attendeeCount = 0
   for (const member of row.attendance_members) {
     if (member.attendance_status === 'attended') {
@@ -172,15 +174,21 @@ async function loadStaffAttendance(): Promise<StaffRecord[] | null> {
   return records
 }
 
-// how long a session was in hours
-function getHours(record: StaffRecord): number {
+// how long a session was in minutes
+function getMinutes(record: StaffRecord): number {
   const start = record.startTime.split(':')
   const end = record.endTime.split(':')
 
   const startMinutes = Number(start[0]) * 60 + Number(start[1])
   const endMinutes = Number(end[0]) * 60 + Number(end[1])
 
-  return (endMinutes - startMinutes) / 60
+  return endMinutes - startMinutes
+}
+
+// turns minutes into hours for showing on the page, like 80 minutes -> 1.33
+function formatHours(minutes: number): string {
+  const hours = Math.round((minutes / 60) * 100) / 100
+  return String(hours)
 }
 
 // gets every program year in the data; newest first
@@ -207,7 +215,7 @@ function yearOptions(years: string[]): string {
   return options
 }
 
-// adds up sessions and hours for each family in one program year
+// adds up sessions and minutes for each family in one program year
 function getFamilySummaries(year: string): FamilySummary[] {
   const summaries: FamilySummary[] = []
 
@@ -225,13 +233,13 @@ function getFamilySummaries(year: string): FamilySummary[] {
     }
 
     if (!summary) {
-      summary = { familyName: record.familyName, sessionCount: 0, hours: 0, instructionalHours: 0, mandatoryDone: false }
+      summary = { familyName: record.familyName, sessionCount: 0, minutes: 0, instructionalMinutes: 0, mandatoryDone: false }
       summaries.push(summary)
     }
 
     summary.sessionCount += 1
-    summary.hours += getHours(record)
-    summary.instructionalHours += getHours(record) * record.attendeeCount
+    summary.minutes += getMinutes(record)
+    summary.instructionalMinutes += getMinutes(record) * record.attendeeCount
 
     if (record.mandatory) {
       summary.mandatoryDone = true
@@ -244,10 +252,10 @@ function getFamilySummaries(year: string): FamilySummary[] {
 
 // puts families with the fewest hours first, so the ones who need help are at the top
 function fewestHoursFirst(a: FamilySummary, b: FamilySummary): number {
-  return a.hours - b.hours
+  return a.minutes - b.minutes
 }
 
-//keeps only the families whose name matches the search
+// keeps only the families whose name matches the search
 function filterFamilies(summaries: FamilySummary[], query: string): FamilySummary[] {
   const search = query.trim().toLowerCase()
 
@@ -273,7 +281,7 @@ function filterByCard(summaries: FamilySummary[]): FamilySummary[] {
 
   const matches: FamilySummary[] = []
   for (const summary of summaries) {
-    const isComplete = summary.hours >= requiredHours
+    const isComplete = summary.minutes >= requiredMinutes
 
     if (cardFilter === 'complete' && isComplete) {
       matches.push(summary)
@@ -308,16 +316,16 @@ function handleCardClick(event: Event): void {
   yearChange()
 }
 
-// builds summary cards at top
+// builds the summary boxes at the top
 function buildSummaryCards(summaries: FamilySummary[]): string {
   let completed = 0
-  let instructionalHours = 0
+  let instructionalMinutes = 0
 
   for (const summary of summaries) {
-    if(summary.hours >= requiredHours) {
+    if (summary.minutes >= requiredMinutes) {
       completed += 1
     }
-    instructionalHours += summary.instructionalHours
+    instructionalMinutes += summary.instructionalMinutes
   }
 
   const inProgress = summaries.length - completed
@@ -338,7 +346,7 @@ function buildSummaryCards(summaries: FamilySummary[]): string {
       </button>
       <div class="staff-card">
         <p class="staff-card-label">Total Instructional Hours</p>
-        <p class="staff-card-number">${instructionalHours}</p>
+        <p class="staff-card-number">${formatHours(instructionalMinutes)}</p>
       </div>
     </div>
   `
@@ -349,14 +357,14 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
   let rows = ''
 
   for (const summary of summaries) {
-    let percent = (summary.hours / requiredHours) * 100
+    let percent = (summary.minutes / requiredMinutes) * 100
     if (percent > 100) {
       percent = 100
     }
 
     let status = '<span class="status-pill in-progress">In progress</span>'
     let fillClass = 'mini-fill'
-    if (summary.hours >= requiredHours) {
+    if (summary.minutes >= requiredMinutes) {
       status = '<span class="status-pill complete">Complete</span>'
       fillClass = 'mini-fill complete'
     }
@@ -376,7 +384,8 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
             <div class="${fillClass}" style="width: ${percent}%;"></div>
           </div>
         </td>
-        <td class="hours-cell">${summary.hours} / ${requiredHours}</td>
+        <td class="hours-cell">${formatHours(summary.minutes)} / ${requiredHours}</td>
+        <td>${formatHours(summary.instructionalMinutes)}</td>
         <td>${status}</td>
       </tr>
     `
@@ -385,12 +394,12 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
   return rows
 }
 
-// shows the cards and families table for one program year
+// shows the boxes and families table for one program year
 function showYear(year: string): void {
   const yearContent = document.querySelector<HTMLElement>('#staff-year-content')!
   const summaries = getFamilySummaries(year)
 
-  // only the families that match the search
+  // only the families that match the box and the search
   const query = document.querySelector<HTMLInputElement>('#staff-attendance-search')!.value
   const filtered = filterFamilies(filterByCard(summaries), query)
 
@@ -412,13 +421,14 @@ function showYear(year: string): void {
             <th>Mandatory</th>
             <th>Progress</th>
             <th>Hours</th>
+            <th>Instructional Hours</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
           ${buildFamilyRows(filtered) || `
             <tr>
-              <td colspan="6" class="empty-state">No matching families found.</td>
+              <td colspan="7" class="empty-state">No matching families found.</td>
             </tr>
           `}
         </tbody>
@@ -426,14 +436,14 @@ function showYear(year: string): void {
     </div>
   `
 
-  //make boxes clickable
+  // make the boxes clickable
   const cards = yearContent.querySelectorAll<HTMLButtonElement>('.staff-card.clickable')
   for (const card of cards) {
     card.addEventListener('click', handleCardClick)
   }
 }
 
-// runs when a different year is picked
+// runs when a different year is picked or the search changes
 function yearChange(): void {
   const selectYear = document.querySelector<HTMLSelectElement>('#staff-year-select')!
   showYear(selectYear.value)
@@ -460,7 +470,7 @@ async function startStaffAttendanceTab(): Promise<void> {
     return
   }
 
-  // year dropdown and empty spot for the families table
+  // year dropdown, search box, and empty spot for the families table
   staffSection.innerHTML = titleAndIntro + `
     <div class="attendance-toolbar">
       <div class="year-filter">
@@ -470,7 +480,7 @@ async function startStaffAttendanceTab(): Promise<void> {
         </select>
       </div>
 
-       <div class="attendance-controls">
+      <div class="attendance-controls">
         <input
           id="staff-attendance-search"
           type="search"
@@ -486,7 +496,7 @@ async function startStaffAttendanceTab(): Promise<void> {
   // show newest year first
   showYear(programYears[0])
 
-  // update the table when the year changes
+  // update the table when the year or search changes
   document.querySelector<HTMLSelectElement>('#staff-year-select')!.addEventListener('change', yearChange)
   document.querySelector<HTMLInputElement>('#staff-attendance-search')!.addEventListener('input', yearChange)
 }
