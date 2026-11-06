@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parents Challenge Portal</title>
+    <link rel="stylesheet" href="src/dashboard.css">
+    <link rel="stylesheet" href="src/manage-applications.css">
+</head>
+<body>
+    <main class="page">
+
+    <!--header-->
+        <header class="header">
+            <a href="#" class="logo-link" aria-label="Parents Challenge home">
+                <img
+                    src="src/assets/parents-challenge-logo.jpg"
+                    alt="Parents Challenge Colorado"
+                    class="logo"
+                >
+            </a>
+            <div class="header-links">
+                <a href="#">Contact Us</a>
+                <span class="separator">|</span>
+                <a href="index.html">Sign Out</a>
+            </div>
+        </header>
+
+    <!--Greeting-->
+    <h1 class="welcome-title">Welcome to Your Staff Dashboard, Sarah Smith</h1> <!--name of actual user will be queried/creds. stored-->
+
+    <!--menu navigation-->
+    <nav>
+        <ul class="nav-bar">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Families</a></li>
+            <li><a href="#">Scholars</a></li>
+            <li><a href="#">Sessions</a></li>
+            <li><a href="#">Attendance</a></li>
+            <li><a href="#">Parent Coordinators</a></li>
+            <li><a href="#">Documents</a></li>
+            <li><a href="#">Reports & Analytics</a></li>
+            <l1><a href="manage-applications.html">Applications</a></l1>
+        </ul>
+    </nav>
+
+    <main class="application-container">
+        <header class="page-header">
+            <div>
+                <h1>Waitlist Applications</h1>
+            </div>
+        </header>
+
+        <br>
+
+        <!-- Dashboard statistics -->
+        <section class="statistics-grid">
+
+            <article class="stat-card">
+                <p>Total Applications</p>
+                <h2 id="total-count">0</h2>
+            </article>
+
+            <article class="stat-card pending-card">
+                <p>Pending Review</p>
+                <h2 id="pending-count">0</h2>
+            </article>
+
+            <article class="stat-card approved-card">
+                <p>Approved</p>
+                <h2 id="approved-count">0</h2>
+            </article>
+
+            <article class="stat-card rejected-card">
+                <p>Rejected</p>
+                <h2 id="rejected-count">0</h2>
+            </article>
+
+        </section>
+
+        <!--applications table -->
+        <section class="applications-section">
+
+            <div class="section-header">
+                <div>
+                    <h2>Submitted Applications</h2>
+                    <p>View and manage waitlist applications</p>
+                </div>
+
+                <button type="button" id="export-button" class="export-button">
+                    Export to CSV
+                </button>
+            </div>
+
+            <div class="filter-container">
+
+                <input
+                    type="search"
+                    id="application-search"
+                    placeholder="Search family name or application number..."
+                >
+
+                <select id="status-filter">
+                    <option value="all">All Applications</option>
+                    <option value="pending_review">Pending Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Application Number</th>
+                            <th>Family Name</th>
+                            <th>Submitted On</th>
+                            <th>Program Year</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="applications-table-body">
+                    </tbody>
+                </table>
+
+                <p id="no-applications" hidden>
+                    No applications found.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FULL APPLICATION DETAILS POPUP -->
+    <dialog id="application-dialog" class="application-dialog">
+
+        <div class="dialog-header">
+
+            <div>
+                <p class="eyebrow">APPLICATION REVIEW</p>
+                <h2>Family Application Details</h2>
+                <p id="dialog-application-number"></p>
+            </div>
+
+            <button
+                type="button"
+                id="close-dialog"
+                class="icon-close"
+                aria-label="Close application details">
+            </button>
+
+        </div>
+
+        <!-- Application information is dynamically populated -->
+        <div id="application-details" class="dialog-content">
+        </div>
+
+        <!-- Popup actions -->
+        <div class="dialog-actions">
+
+            <button
+                type="button"
+                id="dialog-approve"
+                class="approve-button">
+                Approve
+            </button>
+
+            <button
+                type="button"
+                id="dialog-reject"
+                class="reject-button">
+                Reject
+            </button>
+
+            <button
+                type="button"
+                id="dialog-close"
+                class="close-button">
+                Close
+            </button>
+
+        </div>
+
+    </dialog>
+
+    <script type="module" src="/src/manage-applications.ts"></script>
+
+</body>
+</html>

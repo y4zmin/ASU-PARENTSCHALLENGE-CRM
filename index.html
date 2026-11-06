@@ -22,7 +22,7 @@
             <!--landing page-->
             <h1>Welcome to Your Parents Challenge Portal</h1>
 
-            <form class="login-form">
+            <form class="login-form" id="login-form">
                 <div class="form-group">
                     <label for="username">Email</label>
                     <input
@@ -50,9 +50,12 @@
                     </a>
                 </div>
 
-                <button type="submit" class="sign-in-button">
+                <button type="submit" class="sign-in-button" id="login-button">
                     Sign In
                 </button>
+
+                <p id="login-message" hidden></p>
+                
             </form>
 
             <p class="enrollment">
