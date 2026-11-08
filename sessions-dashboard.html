@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parents Challenge Sessions</title>
+
+    <link rel="stylesheet" href="src/dashboard.css">
+    <link rel="stylesheet" href="/src/events.css">
+</head>
+
+<body>
+    <main class="page">
+
+        <header class="header">
+            <a href="#" class="logo-link" aria-label="Parents Challenge home">
+                <img
+                    src="src/assets/parents-challenge-logo.jpg"
+                    alt="Parents Challenge Colorado"
+                    class="logo"
+                >
+            </a>
+
+            <div class="header-links">
+                <a href="#">Contact Us</a>
+                <span class="separator">|</span>
+                <a href="index.html" id="logout-link">Sign Out</a>
+            </div>
+        </header>
+
+        <h1 class="welcome-title">
+            Session Management
+        </h1>
+
+        <section
+            id="events-dashboard"
+            class="events-dashboard">
+        </section>
+
+    </main>
+
+    <script type="module" src="/src/sessions-auth.ts"></script>
+    <script type="module" src="/src/events.ts"></script>
+    <script type="module" src="/src/logout.ts"></script>
+
+</body>
+</html>

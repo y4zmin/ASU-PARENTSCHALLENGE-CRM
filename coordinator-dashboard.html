@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parents Challenge Coordinator Dashboard</title>
+    <link rel="stylesheet" href="src/dashboard.css">
+</head>
+
+<body>
+    <main class="page">
+
+        <header class="header">
+            <a href="#" class="logo-link" aria-label="Parents Challenge home">
+                <img
+                    src="src/assets/parents-challenge-logo.jpg"
+                    alt="Parents Challenge Colorado"
+                    class="logo"
+                >
+            </a>
+
+            <div class="header-links">
+                <a href="#">Contact Us</a>
+                <span class="separator">|</span>
+                <a href="index.html" id="logout-link">Sign Out</a>
+            </div>
+        </header>
+
+        <h1 class="welcome-title">
+            Welcome to Your Coordinator Dashboard
+        </h1>
+
+        <nav>
+            <ul class="nav-bar">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Assigned Families</a></li>
+                <li><a href="#">Parents</a></li>
+                <li><a href="#">Scholars</a></li>
+                <li><a href="#">Sessions</a></li>
+                <li><a href="#">Attendance</a></li>
+                <li><a href="#">Documents</a></li>
+            </ul>
+        </nav>
+
+    </main>
+
+    <script type="module" src="/src/coordinator-auth.ts"></script>
+    <script type="module" src="/src/logout.ts"></script>
+</body>
+</html>

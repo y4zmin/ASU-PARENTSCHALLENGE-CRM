@@ -6,12 +6,17 @@ const emailInput = document.querySelector('#username') as HTMLInputElement
 const passwordInput = document.querySelector('#password') as HTMLInputElement
 const loginMessage = document.querySelector('#login-message') as HTMLParagraphElement
 const loginButton = document.querySelector('#login-button') as HTMLButtonElement
+const roleSelection = document.querySelector('#role-selection') as HTMLDivElement
+const roleButtons = document.querySelector('#role-buttons') as HTMLDivElement
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault()
 
   loginMessage.hidden = true
   loginMessage.textContent = ''
+
+  roleSelection.hidden = true
+  roleButtons.innerHTML = ''
 
   loginButton.disabled = true
   loginButton.textContent = 'Signing In...'
@@ -53,6 +58,8 @@ const { data: roles, error: rolesError } = await supabase.rpc(
   'get_my_roles'
 )
 
+console.log('Roles returned:', roles)
+
 if (rolesError || !roles || roles.length === 0) {
   loginMessage.textContent = 'No CRM role is assigned to this account.'
   loginMessage.hidden = false
@@ -61,6 +68,50 @@ if (rolesError || !roles || roles.length === 0) {
   loginButton.textContent = 'Sign In'
 
   await supabase.auth.signOut()
+  return
+}
+
+if (roles.length > 1) {
+  loginButton.disabled = false
+  loginButton.textContent = 'Sign In'
+
+  roleSelection.hidden = false
+
+  for (const role of roles) {
+    const button = document.createElement('button')
+
+    button.type = 'button'
+    button.textContent =
+      role.charAt(0).toUpperCase() + role.slice(1)
+
+    button.addEventListener('click', async () => {
+      const { error: switchError } = await supabase.rpc(
+        'switch_active_role',
+        {
+          selected_role: role
+        }
+      )
+
+      if (switchError) {
+        loginMessage.textContent = 'Could not switch role.'
+        loginMessage.hidden = false
+        return
+      }
+
+      if (role === 'admin') {
+        window.location.href = '/admin-dashboard.html'
+      } else if (role === 'staff') {
+        window.location.href = '/staff-dashboard.html'
+      } else if (role === 'coordinator') {
+        window.location.href = '/coordinator-dashboard.html'
+      } else if (role === 'parent') {
+        window.location.href = '/parent-dashboard.html'
+      }
+    })
+
+    roleButtons.appendChild(button)
+  }
+
   return
 }
 
