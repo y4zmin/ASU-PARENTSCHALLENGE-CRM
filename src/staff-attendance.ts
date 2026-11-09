@@ -73,8 +73,21 @@ interface AttendanceRow {
   attendance_members: AttendeeRow[]
 }
 
+// one family enrolled in one program year (family_program_years table)
+interface EnrollmentRow {
+  families: FamilyRow | null
+  program_years: ProgramYearRow | null
+}
+
+// a family enrolled in a program year, even if they haven't attended anything yet
+interface Enrollment {
+  programYear: string
+  familyName: string
+}
+
 // filled in from supabase when the page loads
 let staffRecords: StaffRecord[] = []
+let enrollments: Enrollment[] = []
 
 // required hours of learning, and the same in minutes
 const requiredHours = 12
@@ -174,6 +187,32 @@ async function loadStaffAttendance(): Promise<StaffRecord[] | null> {
   return records
 }
 
+// gets every family enrolled in each program year, so families with 0 hours still show up
+async function loadEnrollments(): Promise<Enrollment[]> {
+  const { data, error } = await supabase
+    .from('family_program_years')
+    .select(`
+      families ( family_name ),
+      program_years ( name )
+    `)
+
+  // if this fails, still show the families that have attendance
+  if (error) {
+    console.error('Could not load enrollments:', error.message)
+    return []
+  }
+
+  const list: Enrollment[] = []
+  // supabase guesses the wrong shape here, so we tell typescript what it really is
+  for (const row of data as unknown as EnrollmentRow[]) {
+    if (row.families && row.program_years) {
+      list.push({ programYear: row.program_years.name, familyName: row.families.family_name })
+    }
+  }
+
+  return list
+}
+
 // how long a session was in minutes
 function getMinutes(record: StaffRecord): number {
   const start = record.startTime.split(':')
@@ -191,9 +230,15 @@ function formatHours(minutes: number): string {
   return String(hours)
 }
 
-// gets every program year in the data; newest first
+// gets every program year from enrollments and attendance; newest first
 function getProgramYears(): string[] {
   const years: string[] = []
+
+  for (const enrollment of enrollments) {
+    if (!years.includes(enrollment.programYear)) {
+      years.push(enrollment.programYear)
+    }
+  }
 
   for (const record of staffRecords) {
     if (!years.includes(record.programYear)) {
@@ -201,6 +246,9 @@ function getProgramYears(): string[] {
     }
   }
 
+  // years look like 2026-2027, so sorting them as text and flipping puts the newest first
+  years.sort()
+  years.reverse()
   return years
 }
 
@@ -218,6 +266,13 @@ function yearOptions(years: string[]): string {
 // adds up sessions and minutes for each family in one program year
 function getFamilySummaries(year: string): FamilySummary[] {
   const summaries: FamilySummary[] = []
+
+  // start with every enrolled family at 0, so families who haven't attended still show up
+  for (const enrollment of enrollments) {
+    if (enrollment.programYear === year) {
+      summaries.push({ familyName: enrollment.familyName, sessionCount: 0, minutes: 0, instructionalMinutes: 0, mandatoryDone: false })
+    }
+  }
 
   for (const record of staffRecords) {
     if (record.programYear !== year) {
@@ -333,7 +388,7 @@ function buildSummaryCards(summaries: FamilySummary[]): string {
   return `
     <div class="staff-cards">
       <button type="button" class="${cardClass('all')}" data-filter="all">
-        <p class="staff-card-label">Families Attending</p>
+        <p class="staff-card-label">Families Enrolled</p>
         <p class="staff-card-number">${summaries.length}</p>
       </button>
       <button type="button" class="${cardClass('complete')}" data-filter="complete">
@@ -364,6 +419,9 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
 
     let status = '<span class="status-pill in-progress">In progress</span>'
     let fillClass = 'mini-fill'
+    if (summary.minutes === 0) {
+      status = '<span class="status-pill not-started">Not started</span>'
+    }
     if (summary.minutes >= requiredMinutes) {
       status = '<span class="status-pill complete">Complete</span>'
       fillClass = 'mini-fill complete'
@@ -462,11 +520,12 @@ async function startStaffAttendanceTab(): Promise<void> {
   }
 
   staffRecords = records
+  enrollments = await loadEnrollments()
   const programYears = getProgramYears()
 
-  // no attendance recorded yet
+  // no families or attendance yet
   if (programYears.length === 0) {
-    staffSection.innerHTML = titleAndIntro + '<p class="empty-state">No attendance recorded yet.</p>'
+    staffSection.innerHTML = titleAndIntro + '<p class="empty-state">No families or attendance recorded yet.</p>'
     return
   }
 

@@ -80,6 +80,12 @@ Table, toolbar, and dropdown styles come from attendance.css.
   color: #a35a0a;
 }
 
+/* family enrolled but hasn't attended anything yet (buildFamilyRows) */
+.status-pill.not-started {
+  background-color: #fbe4e4;
+  color: #a12e2e;
+}
+
 /* 2 cards per row on small screens */
 @media (max-width: 800px) {
   .staff-cards {
