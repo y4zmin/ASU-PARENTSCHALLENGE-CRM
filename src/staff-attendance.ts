@@ -21,11 +21,13 @@ const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a')
 interface StaffRecord {
   programYear: string
   familyName: string
+  sessionTitle: string
   sessionDate: string
   startTime: string
   endTime: string
   mandatory: boolean
   attendeeCount: number
+  attendeeNames: string[]
 }
 
 // one family's totals for a program year; kept in minutes so times like 1 hour 20 minutes add up exactly
@@ -44,6 +46,7 @@ interface ProgramYearRow {
 
 // sessions table
 interface SessionRow {
+  title: string
   session_date: string
   start_time: string
   end_time: string
@@ -61,9 +64,19 @@ interface RegistrationRow {
   families: FamilyRow | null
 }
 
+// a parent or scholar's name
+interface PersonName {
+  first_name: string
+  last_name: string
+}
+
 // one person at a session (attendance_members table)
 interface AttendeeRow {
   attendance_status: string | null
+  attendee_type: string
+  display_name: string | null
+  parents: PersonName | null
+  scholars: PersonName | null
 }
 
 // one attendance row with everything connected to it
@@ -96,6 +109,9 @@ const requiredMinutes = requiredHours * 60
 // which box is picked: 'all', 'complete', or 'in-progress'
 let cardFilter = 'all'
 
+// which family's sessions are open; empty means none
+let openFamily = ''
+
 // title and intro at the top of the tab
 const titleAndIntro = `
   <h2 class="attendance-title">Attendance</h2>
@@ -103,6 +119,23 @@ const titleAndIntro = `
     View every family's attendance and their progress toward the required 12 hours of learning.
   </p>
 `
+
+// get each person's name with who they are
+function getAttendeeName(member: AttendeeRow): string {
+  if (member.attendee_type === 'parent' && member.parents) {
+    return member.parents.first_name + ' ' + member.parents.last_name + ' (Parent)'
+  }
+
+  if (member.attendee_type === 'scholar' && member.scholars) {
+    return member.scholars.first_name + ' ' + member.scholars.last_name + ' (Scholar)'
+  }
+
+  if (member.display_name) {
+    return member.display_name + ' (Guest)'
+  }
+
+  return 'Unknown'
+}
 
 // changes a supabase row into a simpler record
 function toStaffRecord(row: AttendanceRow): StaffRecord | null {
@@ -123,22 +156,24 @@ function toStaffRecord(row: AttendanceRow): StaffRecord | null {
     programYear = session.program_years.name
   }
 
-  // how many people from the family came
-  let attendeeCount = 0
+  // who from the family came, and how many
+  const attendeeNames: string[] = []
   for (const member of row.attendance_members) {
     if (member.attendance_status === 'attended') {
-      attendeeCount += 1
+      attendeeNames.push(getAttendeeName(member))
     }
   }
 
   return {
     programYear: programYear,
     familyName: familyName,
+    sessionTitle: session.title,
     sessionDate: session.session_date,
     startTime: session.start_time,
     endTime: session.end_time,
     mandatory: session.is_mandatory,
-    attendeeCount: attendeeCount,
+    attendeeCount: attendeeNames.length,
+    attendeeNames: attendeeNames,
   }
 }
 
@@ -159,13 +194,17 @@ async function loadStaffAttendance(): Promise<StaffRecord[] | null> {
     .from('attendance')
     .select(`
       sessions (
-        session_date, start_time, end_time, is_mandatory,
+        title, session_date, start_time, end_time, is_mandatory,
         program_years ( name )
       ),
       registrations (
         families ( family_name )
       ),
-      attendance_members ( attendance_status )
+      attendance_members (
+        attendance_status, attendee_type, display_name,
+        parents ( first_name, last_name ),
+        scholars ( first_name, last_name )
+      )
     `)
     .eq('attendance_status', 'present')
 
@@ -222,6 +261,13 @@ function getMinutes(record: StaffRecord): number {
   const endMinutes = Number(end[0]) * 60 + Number(end[1])
 
   return endMinutes - startMinutes
+}
+
+// formats a date like 2026-10-06 into Oct 6, 2026
+function formatDate(date: string): string {
+  const dateParts = date.split('-')
+  const dateObject = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]))
+  return dateObject.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 // turns minutes into hours for showing on the page, like 80 minutes -> 1.33
@@ -371,6 +417,69 @@ function handleCardClick(event: Event): void {
   yearChange()
 }
 
+// runs when a family name is clicked; clicking the same family again closes it
+function handleFamilyClick(event: Event): void {
+  const clickedButton = event.currentTarget as HTMLButtonElement
+  const familyName = clickedButton.dataset.family!
+
+  if (openFamily === familyName) {
+    openFamily = ''
+  } else {
+    openFamily = familyName
+  }
+
+  yearChange()
+}
+
+// builds the list of sessions one family attended in one program year
+function buildFamilySessions(familyName: string, year: string): string {
+  let rows = ''
+
+  for (const record of staffRecords) {
+    if (record.familyName !== familyName || record.programYear !== year) {
+      continue
+    }
+
+    let mandatoryTag = ''
+    if (record.mandatory) {
+      mandatoryTag = ' <span class="mandatory-tag">Mandatory</span>'
+    }
+
+    rows += `
+      <tr>
+        <td>${formatDate(record.sessionDate)}</td>
+        <td>${record.sessionTitle}${mandatoryTag}</td>
+        <td>${record.attendeeNames.join(', ')}</td>
+        <td>${formatHours(getMinutes(record))}</td>
+        <td>${record.attendeeCount}</td>
+        <td>${formatHours(getMinutes(record) * record.attendeeCount)}</td>
+      </tr>
+    `
+  }
+
+  if (!rows) {
+    return '<p class="empty-state">No sessions attended yet this program year.</p>'
+  }
+
+  return `
+    <table class="family-sessions">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Session</th>
+          <th>Who Attended</th>
+          <th>Hours</th>
+          <th>People</th>
+          <th>Instructional Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `
+}
+
 // builds the summary boxes at the top
 function buildSummaryCards(summaries: FamilySummary[]): string {
   let completed = 0
@@ -407,8 +516,8 @@ function buildSummaryCards(summaries: FamilySummary[]): string {
   `
 }
 
-// builds one table row for each family
-function buildFamilyRows(summaries: FamilySummary[]): string {
+// builds one table row for each family, plus the open family's sessions under it
+function buildFamilyRows(summaries: FamilySummary[], year: string): string {
   let rows = ''
 
   for (const summary of summaries) {
@@ -432,9 +541,18 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
       mandatory = 'Attended'
     }
 
+    let arrow = '▶'
+    if (openFamily === summary.familyName) {
+      arrow = '▼'
+    }
+
     rows += `
       <tr>
-        <td>${summary.familyName}</td>
+        <td>
+          <button type="button" class="family-toggle" data-family="${summary.familyName}">
+            <span class="toggle-arrow">${arrow}</span> ${summary.familyName}
+          </button>
+        </td>
         <td>${summary.sessionCount}</td>
         <td>${mandatory}</td>
         <td>
@@ -447,6 +565,15 @@ function buildFamilyRows(summaries: FamilySummary[]): string {
         <td>${status}</td>
       </tr>
     `
+
+    // show this family's sessions right under their row
+    if (openFamily === summary.familyName) {
+      rows += `
+        <tr class="family-details-row">
+          <td colspan="7">${buildFamilySessions(summary.familyName, year)}</td>
+        </tr>
+      `
+    }
   }
 
   return rows
@@ -484,7 +611,7 @@ function showYear(year: string): void {
           </tr>
         </thead>
         <tbody>
-          ${buildFamilyRows(filtered) || `
+          ${buildFamilyRows(filtered, year) || `
             <tr>
               <td colspan="7" class="empty-state">No matching families found.</td>
             </tr>
@@ -498,6 +625,12 @@ function showYear(year: string): void {
   const cards = yearContent.querySelectorAll<HTMLButtonElement>('.staff-card.clickable')
   for (const card of cards) {
     card.addEventListener('click', handleCardClick)
+  }
+
+  // make the family names clickable
+  const familyButtons = yearContent.querySelectorAll<HTMLButtonElement>('.family-toggle')
+  for (const button of familyButtons) {
+    button.addEventListener('click', handleFamilyClick)
   }
 }
 
