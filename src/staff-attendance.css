@@ -172,3 +172,16 @@ Table, toolbar, and dropdown styles come from attendance.css.
   padding: 6px 8px;
   border-bottom: 1px solid #e3e8e5;
 }
+
+/* space and a line between the family hours table and the roster */
+#session-roster-section {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #d5ddd9;
+}
+
+/* left-align every column so headers line up with their values */
+#session-roster-section .attendance-table th,
+#session-roster-section .attendance-table td {
+  text-align: left;
+}
