@@ -185,15 +185,20 @@ function formatDate(date: string): string {
   return dateObject.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// how long a session was in hours
-function getHours(record: AttendanceRecord): number {
+// how long a session was in minutes
+function getMinutes(record: AttendanceRecord): number {
   const start = record.startTime.split(':')
   const end = record.endTime.split(':')
 
   const startMinutes = Number(start[0]) * 60 + Number(start[1])
   const endMinutes = Number(end[0]) * 60 + Number(end[1])
 
-  return (endMinutes - startMinutes) / 60
+  return endMinutes - startMinutes
+}
+
+// how long a session was in hours, rounded to 2 decimals
+function getHours(record: AttendanceRecord): number {
+  return Math.round(getMinutes(record) / 60 * 100) / 100
 }
 
 // builds one table row for each session
@@ -263,21 +268,21 @@ function yearOptions(years: string[]): string {
 // required hours of learning
 const requiredHours = 12
 
-// adds up hours from a list of sessions
+// adds up minutes first, then turns them into hours so the total is exact
 function getTotalHours(records: AttendanceRecord[]): number {
-  let totalHours = 0
+  let totalMinutes = 0
 
   for (const record of records) {
-    totalHours += getHours(record)
+    totalMinutes += getMinutes(record)
   }
 
-  return totalHours
+  return Math.round(totalMinutes / 60 * 100) / 100
 }
 
 // build hours progress section
 function buildProgressSection(records: AttendanceRecord[]): string {
   const totalHours = getTotalHours(records)
-  const hoursLeft = requiredHours - totalHours
+  const hoursLeft = Math.round((requiredHours - totalHours) * 100) / 100
   let percent = (totalHours / requiredHours) * 100
 
   if (percent > 100) {
@@ -393,6 +398,7 @@ function showYear(year: string): void {
     </div>
   `
 }
+
 
 // runs when a different year is picked or the search changes
 function yearChange(): void {
