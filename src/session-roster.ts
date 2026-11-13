@@ -67,6 +67,14 @@ function formatTime(time: string): string {
   return hour + ':' + parts[1] + ' ' + period
 }
 
+// today as 'YYYY-MM-DD' so it can be compared to session_date
+function todayString(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return now.getFullYear() + '-' + month + '-' + day
+}
+
 // '1 family' or '3 families'
 function familyCount(count: number): string {
   if (count === 1) {
@@ -138,8 +146,38 @@ async function loadRoster(sessionId: string): Promise<RegistrationRow[] | null> 
   return rows
 }
 
+// sessions today or later; soonest first
+function upcomingSessions(sessions: SessionOption[]): SessionOption[] {
+  const today = todayString()
+  const upcoming: SessionOption[] = []
+
+  for (const session of sessions) {
+    if (session.session_date >= today) {
+      upcoming.push(session)
+    }
+  }
+
+  // sessions come in newest first, so flip them to get soonest first
+  upcoming.reverse()
+  return upcoming
+}
+
+// sessions before today; newest first
+function pastSessions(sessions: SessionOption[]): SessionOption[] {
+  const today = todayString()
+  const past: SessionOption[] = []
+
+  for (const session of sessions) {
+    if (session.session_date < today) {
+      past.push(session)
+    }
+  }
+
+  return past
+}
+
 // one dropdown option for each session
-function sessionOptions(sessions: SessionOption[]): string {
+function optionList(sessions: SessionOption[]): string {
   let options = ''
 
   for (const session of sessions) {
@@ -148,6 +186,20 @@ function sessionOptions(sessions: SessionOption[]): string {
   }
 
   return options
+}
+
+// upcoming sessions first, then past ones under their own label
+function sessionOptions(upcoming: SessionOption[], past: SessionOption[]): string {
+  let html = ''
+
+  if (upcoming.length > 0) {
+    html += '<optgroup label="Upcoming">' + optionList(upcoming) + '</optgroup>'
+  }
+  if (past.length > 0) {
+    html += '<optgroup label="Past">' + optionList(past) + '</optgroup>'
+  }
+
+  return html
 }
 
 // heading that only shows on the printed page
@@ -319,6 +371,8 @@ async function startRoster(): Promise<void> {
   }
 
   allSessions = sessions
+  const upcoming = upcomingSessions(sessions)
+  const past = pastSessions(sessions)
 
   // session dropdown, print button, and empty spot for the table
   rosterSection.innerHTML = rosterTitle + `
@@ -326,7 +380,7 @@ async function startRoster(): Promise<void> {
       <div class="year-filter">
         <label for="roster-session-select">Session</label>
         <select id="roster-session-select">
-          ${sessionOptions(sessions)}
+          ${sessionOptions(upcoming, past)}
         </select>
       </div>
 
@@ -336,8 +390,12 @@ async function startRoster(): Promise<void> {
     <div id="roster-content"></div>
   `
 
-  // show newest session first
-  showRoster(String(sessions[0].id))
+  // start on the next upcoming session, or the newest past one if none are coming up
+  let firstSession = sessions[0]
+  if (upcoming.length > 0) {
+    firstSession = upcoming[0]
+  }
+  showRoster(String(firstSession.id))
 
   document.querySelector<HTMLSelectElement>('#roster-session-select')!.addEventListener('change', sessionChange)
   document.querySelector<HTMLButtonElement>('#print-roster')!.addEventListener('click', printRoster)
