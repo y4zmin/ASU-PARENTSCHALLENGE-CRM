@@ -173,6 +173,8 @@ Table, toolbar, and dropdown styles come from attendance.css.
   border-bottom: 1px solid #e3e8e5;
 }
 
+/* ---------- session roster ---------- */
+
 /* space and a line between the family hours table and the roster */
 #session-roster-section {
   margin-top: 48px;
@@ -184,4 +186,170 @@ Table, toolbar, and dropdown styles come from attendance.css.
 #session-roster-section .attendance-table th,
 #session-roster-section .attendance-table td {
   text-align: left;
+}
+
+/* "registered" shows as "Registered" */
+.roster-status {
+  text-transform: capitalize;
+}
+
+/* bold totals row at the bottom of the roster */
+.roster-totals td {
+  font-weight: 700;
+  border-top: 2px solid #c5d1cb;
+  background: #f7f9f8;
+}
+
+/* print button next to the session dropdown */
+.print-button {
+  background: #394761;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.print-button:hover {
+  background: #2b364a;
+}
+
+/* only shows on paper */
+.print-only {
+  display: none;
+}
+
+/* empty box for staff to tick on paper */
+.check-box {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #000;
+  border-radius: 2px;
+}
+
+/* letter paper with half inch edges */
+@page {
+  size: letter;
+  margin: 0.5in;
+}
+
+/* printed page shows only the roster */
+@media print {
+  .header,
+  .welcome-title,
+  nav,
+  #events-dashboard,
+  #staff-attendance-section,
+  .no-print {
+    display: none !important;
+  }
+
+  /* plain white page, full width */
+  html,
+  body,
+  .page {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  #session-roster-section {
+    display: block !important;
+    margin: 0;
+    padding: 0;
+    border: none;
+    color: #000;
+  }
+
+  div.print-only {
+    display: block;
+  }
+
+  th.print-only,
+  td.print-only {
+    display: table-cell;
+  }
+
+  /* heading at the top of the page */
+  .roster-print-heading {
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+
+  .roster-eyebrow {
+    margin: 0;
+    font-size: 9pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .roster-print-heading h2 {
+    margin: 4px 0 4px;
+    font-size: 18pt;
+  }
+
+  .roster-meta {
+    margin: 2px 0 0;
+    font-size: 10.5pt;
+    color: #333;
+  }
+
+  /* no scrollbar or rounded box on paper */
+  #session-roster-section .table-wrapper {
+    overflow: visible !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* clean black and white table with thin lines */
+  #session-roster-section .attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5pt;
+  }
+
+  #session-roster-section .attendance-table th,
+  #session-roster-section .attendance-table td {
+    padding: 7px 8px;
+    border-bottom: 1px solid #999;
+    background: #fff !important;
+    color: #000;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  #session-roster-section .attendance-table th {
+    border-bottom: 1.5px solid #000;
+    font-size: 9.5pt;
+  }
+
+  /* notes can wrap so long notes fit */
+  #session-roster-section .roster-notes {
+    white-space: normal;
+    width: 30%;
+  }
+
+  .roster-totals td {
+    border-top: 1.5px solid #000;
+    border-bottom: none;
+  }
+
+  /* totals only once at the very end, not on every page */
+  #session-roster-section tfoot {
+    display: table-row-group;
+  }
+
+  /* don't split a family across two pages */
+  tr {
+    break-inside: avoid;
+  }
 }
