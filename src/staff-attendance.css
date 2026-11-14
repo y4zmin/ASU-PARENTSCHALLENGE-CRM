@@ -353,3 +353,11 @@ Table, toolbar, and dropdown styles come from attendance.css.
     break-inside: avoid;
   }
 }
+
+/* program year and month dropdowns side by side (startStaffAttendanceTab) */
+.staff-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}

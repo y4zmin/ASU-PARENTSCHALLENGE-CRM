@@ -112,6 +112,9 @@ let cardFilter = 'all'
 // which family's sessions are open; empty means none
 let openFamily = ''
 
+// which month is picked, like '2026-10'; 'all' means the whole program year
+let monthFilter = 'all'
+
 // title and intro at the top of the tab
 const titleAndIntro = `
   <h2 class="attendance-title">Attendance</h2>
@@ -276,6 +279,18 @@ function formatHours(minutes: number): string {
   return String(hours)
 }
 
+// gets the month part of a date, like 2026-10-06 -> 2026-10
+function getMonthKey(date: string): string {
+  return date.slice(0, 7)
+}
+
+// formats a month like 2026-10 into October 2026
+function formatMonth(monthKey: string): string {
+  const parts = monthKey.split('-')
+  const dateObject = new Date(Number(parts[0]), Number(parts[1]) - 1, 1)
+  return dateObject.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
 // gets every program year from enrollments and attendance; newest first
 function getProgramYears(): string[] {
   const years: string[] = []
@@ -309,19 +324,52 @@ function yearOptions(years: string[]): string {
   return options
 }
 
-// adds up sessions and minutes for each family in one program year
-function getFamilySummaries(year: string): FamilySummary[] {
+// gets every month that has attendance in one program year; newest first
+function getMonths(year: string): string[] {
+  const months: string[] = []
+
+  // records are already newest first, so months come out newest first too
+  for (const record of staffRecords) {
+    const monthKey = getMonthKey(record.sessionDate)
+    if (record.programYear === year && !months.includes(monthKey)) {
+      months.push(monthKey)
+    }
+  }
+
+  return months
+}
+
+// build the month dropdown for one program year
+function monthOptions(year: string): string {
+  let options = '<option value="all">All months</option>'
+
+  for (const monthKey of getMonths(year)) {
+    options += '<option value="' + monthKey + '">' + formatMonth(monthKey) + '</option>'
+  }
+
+  return options
+}
+
+// adds up sessions and minutes for each family in one program year, or one month of it
+function getFamilySummaries(year: string, month: string): FamilySummary[] {
   const summaries: FamilySummary[] = []
 
-  // start with every enrolled family at 0, so families who haven't attended still show up
-  for (const enrollment of enrollments) {
-    if (enrollment.programYear === year) {
-      summaries.push({ familyName: enrollment.familyName, sessionCount: 0, minutes: 0, instructionalMinutes: 0, mandatoryDone: false })
+  // for the whole year, start with every enrolled family at 0 so families who haven't attended still show up
+  if (month === 'all') {
+    for (const enrollment of enrollments) {
+      if (enrollment.programYear === year) {
+        summaries.push({ familyName: enrollment.familyName, sessionCount: 0, minutes: 0, instructionalMinutes: 0, mandatoryDone: false })
+      }
     }
   }
 
   for (const record of staffRecords) {
     if (record.programYear !== year) {
+      continue
+    }
+
+    // skip sessions from other months when a month is picked
+    if (month !== 'all' && getMonthKey(record.sessionDate) !== month) {
       continue
     }
 
@@ -431,12 +479,16 @@ function handleFamilyClick(event: Event): void {
   yearChange()
 }
 
-// builds the list of sessions one family attended in one program year
-function buildFamilySessions(familyName: string, year: string): string {
+// builds the list of sessions one family attended in one program year, or one month of it
+function buildFamilySessions(familyName: string, year: string, month: string): string {
   let rows = ''
 
   for (const record of staffRecords) {
     if (record.familyName !== familyName || record.programYear !== year) {
+      continue
+    }
+
+    if (month !== 'all' && getMonthKey(record.sessionDate) !== month) {
       continue
     }
 
@@ -570,7 +622,7 @@ function buildFamilyRows(summaries: FamilySummary[], year: string): string {
     if (openFamily === summary.familyName) {
       rows += `
         <tr class="family-details-row">
-          <td colspan="7">${buildFamilySessions(summary.familyName, year)}</td>
+          <td colspan="7">${buildFamilySessions(summary.familyName, year, 'all')}</td>
         </tr>
       `
     }
@@ -579,10 +631,170 @@ function buildFamilyRows(summaries: FamilySummary[], year: string): string {
   return rows
 }
 
+// builds the summary boxes for one month
+function buildMonthCards(summaries: FamilySummary[], year: string, month: string): string {
+  let minutes = 0
+  let instructionalMinutes = 0
+
+  for (const summary of summaries) {
+    minutes += summary.minutes
+    instructionalMinutes += summary.instructionalMinutes
+  }
+
+  // count each session once, even if many families came to it
+  const sessions: string[] = []
+  for (const record of staffRecords) {
+    const sessionKey = record.sessionDate + ' ' + record.sessionTitle
+    if (record.programYear === year && getMonthKey(record.sessionDate) === month && !sessions.includes(sessionKey)) {
+      sessions.push(sessionKey)
+    }
+  }
+
+  return `
+    <div class="staff-cards">
+      <div class="staff-card">
+        <p class="staff-card-label">Families Attended</p>
+        <p class="staff-card-number">${summaries.length}</p>
+      </div>
+      <div class="staff-card">
+        <p class="staff-card-label">Sessions Attended</p>
+        <p class="staff-card-number">${sessions.length}</p>
+      </div>
+      <div class="staff-card">
+        <p class="staff-card-label">Hours Attended</p>
+        <p class="staff-card-number">${formatHours(minutes)}</p>
+      </div>
+      <div class="staff-card">
+        <p class="staff-card-label">Instructional Hours</p>
+        <p class="staff-card-number">${formatHours(instructionalMinutes)}</p>
+      </div>
+    </div>
+  `
+}
+
+// finds one family's minutes for the whole year, so the month view can still show their 12 hour progress
+function getYearMinutes(yearSummaries: FamilySummary[], familyName: string): number {
+  for (const summary of yearSummaries) {
+    if (summary.familyName === familyName) {
+      return summary.minutes
+    }
+  }
+  return 0
+}
+
+// builds one table row for each family that came in one month, plus the open family's sessions under it
+function buildMonthRows(summaries: FamilySummary[], yearSummaries: FamilySummary[], year: string, month: string): string {
+  let rows = ''
+
+  for (const summary of summaries) {
+    const yearMinutes = getYearMinutes(yearSummaries, summary.familyName)
+
+    let percent = (yearMinutes / requiredMinutes) * 100
+    if (percent > 100) {
+      percent = 100
+    }
+
+    let fillClass = 'mini-fill'
+    if (yearMinutes >= requiredMinutes) {
+      fillClass = 'mini-fill complete'
+    }
+
+    let arrow = '▶'
+    if (openFamily === summary.familyName) {
+      arrow = '▼'
+    }
+
+    rows += `
+      <tr>
+        <td>
+          <button type="button" class="family-toggle" data-family="${summary.familyName}">
+            <span class="toggle-arrow">${arrow}</span> ${summary.familyName}
+          </button>
+        </td>
+        <td>${summary.sessionCount}</td>
+        <td class="hours-cell">${formatHours(summary.minutes)}</td>
+        <td>${formatHours(summary.instructionalMinutes)}</td>
+        <td>
+          <div class="mini-bar">
+            <div class="${fillClass}" style="width: ${percent}%;"></div>
+          </div>
+        </td>
+        <td class="hours-cell">${formatHours(yearMinutes)} / ${requiredHours}</td>
+      </tr>
+    `
+
+    // show this family's sessions from this month right under their row
+    if (openFamily === summary.familyName) {
+      rows += `
+        <tr class="family-details-row">
+          <td colspan="6">${buildFamilySessions(summary.familyName, year, month)}</td>
+        </tr>
+      `
+    }
+  }
+
+  return rows
+}
+
+// shows the boxes and families table for one month of a program year
+function showMonth(year: string, month: string): void {
+  const yearContent = document.querySelector<HTMLElement>('#staff-year-content')!
+  const summaries = getFamilySummaries(year, month)
+  const yearSummaries = getFamilySummaries(year, 'all')
+
+  // only the families that match the search
+  const query = document.querySelector<HTMLInputElement>('#staff-attendance-search')!.value
+  const filtered = filterFamilies(summaries, query)
+
+  let resultsLine = formatMonth(month) + ' only. Year Progress counts the whole program year.'
+  if (query.trim()) {
+    resultsLine = 'Showing ' + filtered.length + ' of ' + summaries.length + ' families · ' + resultsLine
+  }
+
+  yearContent.innerHTML = `
+    ${buildMonthCards(summaries, year, month)}
+    <p class="search-results">${resultsLine}</p>
+
+    <div class="table-wrapper">
+      <table class="attendance-table">
+        <thead>
+          <tr>
+            <th>Family</th>
+            <th>Sessions</th>
+            <th>Hours</th>
+            <th>Instructional Hours</th>
+            <th>Year Progress</th>
+            <th>Year Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${buildMonthRows(filtered, yearSummaries, year, month) || `
+            <tr>
+              <td colspan="6" class="empty-state">No matching families found.</td>
+            </tr>
+          `}
+        </tbody>
+      </table>
+    </div>
+  `
+
+  // make the family names clickable
+  const familyButtons = yearContent.querySelectorAll<HTMLButtonElement>('.family-toggle')
+  for (const button of familyButtons) {
+    button.addEventListener('click', handleFamilyClick)
+  }
+}
+
 // shows the boxes and families table for one program year
 function showYear(year: string): void {
+  // a month is picked, so show just that month
+  if (monthFilter !== 'all') {
+    showMonth(year, monthFilter)
+    return
+  }
+
   const yearContent = document.querySelector<HTMLElement>('#staff-year-content')!
-  const summaries = getFamilySummaries(year)
+  const summaries = getFamilySummaries(year, 'all')
 
   // only the families that match the box and the search
   const query = document.querySelector<HTMLInputElement>('#staff-attendance-search')!.value
@@ -640,6 +852,25 @@ function yearChange(): void {
   showYear(selectYear.value)
 }
 
+// runs when a different program year is picked; each year has its own months, so the month list starts over
+function yearPicked(): void {
+  const selectYear = document.querySelector<HTMLSelectElement>('#staff-year-select')!
+  const selectMonth = document.querySelector<HTMLSelectElement>('#staff-month-select')!
+
+  monthFilter = 'all'
+  selectMonth.innerHTML = monthOptions(selectYear.value)
+  yearChange()
+}
+
+// runs when a different month is picked
+function monthPicked(): void {
+  const selectMonth = document.querySelector<HTMLSelectElement>('#staff-month-select')!
+
+  monthFilter = selectMonth.value
+  openFamily = ''
+  yearChange()
+}
+
 // loads attendance from supabase, then fills in the tab
 async function startStaffAttendanceTab(): Promise<void> {
   staffSection.innerHTML = titleAndIntro + '<p class="attendance-intro">Loading attendance...</p>'
@@ -662,14 +893,23 @@ async function startStaffAttendanceTab(): Promise<void> {
     return
   }
 
-  // year dropdown, search box, and empty spot for the families table
+  // year and month dropdowns, search box, and empty spot for the families table
   staffSection.innerHTML = titleAndIntro + `
     <div class="attendance-toolbar">
-      <div class="year-filter">
-        <label for="staff-year-select">Program year</label>
-        <select id="staff-year-select">
-          ${yearOptions(programYears)}
-        </select>
+      <div class="staff-filters">
+        <div class="year-filter">
+          <label for="staff-year-select">Program year</label>
+          <select id="staff-year-select">
+            ${yearOptions(programYears)}
+          </select>
+        </div>
+
+        <div class="year-filter">
+          <label for="staff-month-select">Month</label>
+          <select id="staff-month-select">
+            ${monthOptions(programYears[0])}
+          </select>
+        </div>
       </div>
 
       <div class="attendance-controls">
@@ -688,8 +928,9 @@ async function startStaffAttendanceTab(): Promise<void> {
   // show newest year first
   showYear(programYears[0])
 
-  // update the table when the year or search changes
-  document.querySelector<HTMLSelectElement>('#staff-year-select')!.addEventListener('change', yearChange)
+  // update the table when the year, month, or search changes
+  document.querySelector<HTMLSelectElement>('#staff-year-select')!.addEventListener('change', yearPicked)
+  document.querySelector<HTMLSelectElement>('#staff-month-select')!.addEventListener('change', monthPicked)
   document.querySelector<HTMLInputElement>('#staff-attendance-search')!.addEventListener('input', yearChange)
 }
 
