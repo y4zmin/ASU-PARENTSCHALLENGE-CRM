@@ -18,8 +18,8 @@ interface SessionOption {
   id: string
   title: string
   session_date: string
-  start_time: string
-  end_time: string
+  start_time: string | null
+  end_time: string | null
 }
 
 // families table
@@ -48,8 +48,12 @@ function formatDate(date: string): string {
   return dateObject.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// turns '13:00:00' into '1:00 PM'
-function formatTime(time: string): string {
+// turns '13:00:00' into '1:00 PM'; empty if the session has no time saved
+function formatTime(time: string | null): string {
+  if (!time) {
+    return ''
+  }
+
   const parts = time.split(':')
   let hour = Number(parts[0])
   let period = 'AM'
