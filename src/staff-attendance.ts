@@ -15,7 +15,7 @@ const staffSection = document.querySelector<HTMLElement>('#staff-attendance-sect
 const sessionDashboard = document.querySelector<HTMLElement>('#events-dashboard')!
 
 // all links in nav bar
-const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a')
+const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a[href]')
 
 // one attended session for one family
 interface StaffRecord {

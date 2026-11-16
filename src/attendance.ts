@@ -11,7 +11,7 @@ import { supabase } from './supabase'
 const section = document.querySelector<HTMLElement>('#attendance-section')!
 
 // all links in nav bar
-const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a')
+const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a[href]')
 
 // attended session kept record
 interface AttendanceRecord {

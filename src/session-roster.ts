@@ -11,7 +11,7 @@ import { supabase } from './supabase'
 const rosterSection = document.querySelector<HTMLElement>('#session-roster-section')!
 
 // all links in nav bar
-const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a')
+const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a[href]')
 
 // one session in the dropdown
 interface SessionOption {

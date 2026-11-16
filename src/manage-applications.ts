@@ -1019,7 +1019,25 @@ function exportApplications(): void {
 
 }
 
+async function configureNavigation() {
+    const { data: activeRole } = await supabase.rpc("get_active_role");
+
+    if (activeRole === "admin" || activeRole === "staff") {
+        const homePage = `/${activeRole}-dashboard.html`;
+        document.querySelector<HTMLAnchorElement>(".logo-link")!.href = homePage;
+        document.querySelector<HTMLAnchorElement>("#home-link")!.href = homePage;
+    }
+
+    if (activeRole === "staff") {
+        const attendanceLink = document.querySelector<HTMLAnchorElement>("#attendance-link")!;
+        attendanceLink.href = "/staff-dashboard.html#attendance";
+        attendanceLink.removeAttribute("aria-disabled");
+        attendanceLink.removeAttribute("title");
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+    void configureNavigation();
 
     await loadApplications();
 

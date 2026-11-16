@@ -16,5 +16,8 @@ if (!sessionData.session) {
   ) {
     await supabase.auth.signOut()
     window.location.href = '/index.html'
+  } else {
+    document.querySelector<HTMLAnchorElement>('.logo-link')!.href =
+      `/${activeRole}-dashboard.html`
   }
 }
