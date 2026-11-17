@@ -251,15 +251,11 @@ function showDocumentsSection(show: boolean): void {
 
   if (show) {
     sessionDashboard.style.display = 'none'
-  } else {
-    sessionDashboard.style.display = ''
   }
 
   for (const link of navLinks) {
-    if (show && link.dataset.tab === 'documents') {
-      link.classList.add('active')
-    } else {
-      link.classList.remove('active')
+    if (link.dataset.tab === 'documents') {
+      link.classList.toggle('active', show)
     }
   }
 }

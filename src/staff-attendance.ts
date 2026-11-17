@@ -938,17 +938,19 @@ async function startStaffAttendanceTab(): Promise<void> {
 function showStaffAttendance(show: boolean): void {
   staffSection.hidden = !show
 
+  // only hide the session dashboard here; the Home link reloads the page to bring it back
   if (show) {
     sessionDashboard.style.display = 'none'
-  } else {
-    sessionDashboard.style.display = ''
   }
 
+  // only change our own link, so other tabs keep theirs
   for (const link of navLinks) {
-    if (show && link.dataset.tab === 'attendance') {
-      link.classList.add('active')
-    } else {
-      link.classList.remove('active')
+    if (link.dataset.tab === 'attendance') {
+      if (show) {
+        link.classList.add('active')
+      } else {
+        link.classList.remove('active')
+      }
     }
   }
 }
