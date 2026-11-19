@@ -1,0 +1,163 @@
+/*
+Styles for the Reports & Analytics tab.
+Tables and empty messages come from attendance.css.
+*/
+
+/* colors used across the tab */
+#reports-section {
+  --panel-border: #d5ddd9;
+  --text-muted: #5f6b7d;
+}
+
+/* title and intro */
+.report-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* underlined tabs to switch reports */
+.report-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.report-tab {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #394761;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.report-tab:hover {
+  border-bottom-color: #c6d2c9;
+}
+
+.report-tab.active {
+  border-bottom-color: #394761;
+}
+
+.report-tab:disabled {
+  color: #9aa3b0;
+  cursor: not-allowed;
+}
+
+.report-tab:disabled:hover {
+  border-bottom-color: transparent;
+}
+
+/* one row: dropdowns on the left, export and print on the right */
+.report-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toolbar-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+/* small label above each dropdown */
+.toolbar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.toolbar-field select {
+  min-width: 160px;
+  height: 38px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: #394761;
+  background-color: #fff;
+  border: 1px solid #c6d2c9;
+  border-radius: 6px;
+}
+
+.toolbar-field select:focus {
+  outline: 2px solid #394761;
+  outline-offset: 2px;
+}
+
+/* "Clear filters" looks like a link, lined up with the dropdowns */
+.link-button {
+  height: 38px;
+  font: inherit;
+  font-size: 14px;
+  color: #394761;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* everything below the toolbar */
+.report-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* big number and one sentence at the top */
+.report-headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 8px 0 4px;
+}
+
+.report-headline p {
+  margin: 0;
+}
+
+.headline-number {
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  color: #394761;
+}
+
+.headline-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #394761;
+}
+
+.headline-sentence {
+  margin-top: 4px !important;
+  font-size: 16px;
+  color: #394761;
+}
+
+.headline-filters {
+  margin-top: 6px !important;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.report-footnote {
+  margin: -8px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
