@@ -3,8 +3,10 @@ Styles for the Reports & Analytics tab.
 Tables and empty messages come from attendance.css.
 */
 
-/* colors used across the tab */
+/* colors used across the tab; brand navy for families who attended, a light step of the same blue for not yet */
 #reports-section {
+  --chart-attended: #394761;
+  --chart-not-yet: #b8c3d4;
   --panel-border: #d5ddd9;
   --text-muted: #5f6b7d;
 }
@@ -98,6 +100,14 @@ Tables and empty messages come from attendance.css.
   outline-offset: 2px;
 }
 
+/* thin line between "what to show" and "filters" */
+.toolbar-divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 4px 4px 0;
+  background-color: var(--panel-border);
+}
+
 /* "Clear filters" looks like a link, lined up with the dropdowns */
 .link-button {
   height: 38px;
@@ -156,8 +166,206 @@ Tables and empty messages come from attendance.css.
   color: var(--text-muted);
 }
 
+/* the two charts side by side; the bars get more room */
+.chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 24px;
+}
+
+/* white box around each chart */
+.chart-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 22px 24px;
+  background-color: #fff;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+}
+
+.panel-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.panel-heading h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #394761;
+}
+
+.panel-heading p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* legend: small colored square beside plain text */
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: #394761;
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-legend.stacked {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-legend strong {
+  margin-left: 4px;
+}
+
+.legend-key {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.legend-key.attended,
+.bar-part.attended {
+  background-color: var(--chart-attended);
+}
+
+.legend-key.not-yet,
+.bar-part.not-yet {
+  background-color: var(--chart-not-yet);
+}
+
+/* horizontal bar chart */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 150px;
+  align-items: center;
+  gap: 14px;
+}
+
+.bar-label {
+  font-size: 15px;
+  color: #394761;
+  overflow-wrap: anywhere;
+}
+
+/* the bar grows from the left; parts sit side by side with a thin white gap */
+.bar-track {
+  display: flex;
+  gap: 2px;
+  height: 22px;
+}
+
+.bar-part {
+  height: 100%;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* square at the start, rounded at the end */
+.bar-part:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.bar-value {
+  font-size: 14px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.bar-value strong {
+  font-size: 15px;
+  color: #394761;
+}
+
+/* big ring chart for participation */
+.ring-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex: 1;
+}
+
+.ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* white middle that turns the circle into a ring */
+.ring-hole {
+  position: absolute;
+  inset: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #fff;
+}
+
+.ring-percent {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: #394761;
+}
+
+.ring-label {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
 .report-footnote {
   margin: -8px 0 0;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+/* charts stack on top of each other on smaller screens */
+@media screen and (max-width: 900px) {
+  .toolbar-divider {
+    display: none;
+  }
+
+  .chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bar-row {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+
+  .bar-value {
+    grid-column: 2;
+    margin-top: -8px;
+  }
 }

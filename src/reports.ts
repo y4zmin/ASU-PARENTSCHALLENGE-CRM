@@ -206,6 +206,22 @@ function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
+// what percent one number is of another, rounded; 0 if there's nothing to divide by
+function percentOf(part: number, whole: number): number {
+  if (whole === 0) {
+    return 0
+  }
+  return Math.round((part / whole) * 100)
+}
+
+// '1 family' or '3 families'
+function familyWord(count: number): string {
+  if (count === 1) {
+    return '1 family'
+  }
+  return count + ' families'
+}
+
 // gets every program year in the data; newest first
 function getProgramYears(): string[] {
   const years: string[] = []
@@ -385,18 +401,117 @@ function headline(year: string, total: GroupSummary, counties: number): string {
   `
 }
 
+// horizontal bars, one for each group; the dark part is families who attended, the light part is families who haven't yet
+function breakdownChart(groups: GroupSummary[], groupLabel: string): string {
+  // the longest bar fills the track, the others are sized to match
+  let largest = 1
+  for (const group of groups) {
+    if (group.families > largest) {
+      largest = group.families
+    }
+  }
+
+  let rows = ''
+  for (const group of groups) {
+    const notYet = group.families - group.attended
+    const attendedWidth = (group.attended / largest) * 100
+    const notYetWidth = (notYet / largest) * 100
+
+    let attendedPart = ''
+    if (group.attended > 0) {
+      attendedPart = '<span class="bar-part attended" style="width: ' + attendedWidth + '%;" title="' +
+        escapeHtml(group.name) + ': ' + familyWord(group.attended) + ' attended"></span>'
+    }
+
+    let notYetPart = ''
+    if (notYet > 0) {
+      notYetPart = '<span class="bar-part not-yet" style="width: ' + notYetWidth + '%;" title="' +
+        escapeHtml(group.name) + ': ' + familyWord(notYet) + ' not yet"></span>'
+    }
+
+    rows += `
+      <li class="bar-row">
+        <span class="bar-label">${escapeHtml(group.name)}</span>
+        <span class="bar-track">${attendedPart}${notYetPart}</span>
+        <span class="bar-value"><strong>${group.families}</strong> · ${percentOf(group.attended, group.families)}% attended</span>
+      </li>
+    `
+  }
+
+  return `
+    <section class="chart-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Families by ${groupLabel.toLowerCase()}</h3>
+          <p>Each bar is one ${groupLabel.toLowerCase()}, split by whether the family has come to a session yet.</p>
+        </div>
+        <ul class="chart-legend">
+          <li><span class="legend-key attended"></span>Attended</li>
+          <li><span class="legend-key not-yet"></span>Not yet</li>
+        </ul>
+      </div>
+      <ul class="bar-chart">${rows}</ul>
+    </section>
+  `
+}
+
+// big ring showing what share of families came to at least one session
+function participationChart(total: GroupSummary): string {
+  const percent = percentOf(total.attended, total.families)
+  const notYet = total.families - total.attended
+
+  // a thin white gap where the two parts meet, so they read as separate
+  let ring = 'var(--chart-attended) 0% 100%'
+  if (percent === 0) {
+    ring = 'var(--chart-not-yet) 0% 100%'
+  } else if (percent < 100) {
+    ring = 'var(--chart-attended) 0% ' + (percent - 0.6) + '%, #fff ' + (percent - 0.6) + '% ' + percent + '%, ' +
+      'var(--chart-not-yet) ' + percent + '% 99.4%, #fff 99.4% 100%'
+  }
+
+  return `
+    <section class="chart-panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Participation</h3>
+          <p>Families who came to at least one session this year.</p>
+        </div>
+      </div>
+      <div class="ring-wrap">
+        <div class="ring" style="background: conic-gradient(${ring});" role="img"
+          aria-label="${percent}% of families attended at least one session">
+          <div class="ring-hole">
+            <span class="ring-percent">${percent}%</span>
+            <span class="ring-label">attended</span>
+          </div>
+        </div>
+        <ul class="chart-legend stacked">
+          <li><span class="legend-key attended"></span>Attended <strong>${total.attended}</strong></li>
+          <li><span class="legend-key not-yet"></span>Not yet <strong>${notYet}</strong></li>
+        </ul>
+      </div>
+    </section>
+  `
+}
+
 // shows the Families Served report for the picked filters
 function showFamiliesServed(): void {
   const year = pickedValue('#report-year')
+  const groupBy = pickedValue('#report-group')
   const reportContent = document.querySelector<HTMLElement>('#report-content')!
 
   shownRows = filterFamilies(year, pickedValue('#report-county'), pickedValue('#report-status'))
-  shownGroups = getGroups(shownRows, 'county')
+  shownGroups = getGroups(shownRows, groupBy)
   const total = getTotal(shownGroups)
 
   // only show "Clear filters" when a filter is on
   const filtersOn = pickedValue('#report-county') !== 'all' || pickedValue('#report-status') !== 'all'
   document.querySelector<HTMLButtonElement>('#report-clear')!.hidden = !filtersOn
+
+  let groupLabel = 'County'
+  if (groupBy === 'status') {
+    groupLabel = 'Status'
+  }
 
   if (shownRows.length === 0) {
     reportContent.innerHTML = '<p class="empty-state">No families match these filters. Try "Clear filters".</p>'
@@ -405,6 +520,10 @@ function showFamiliesServed(): void {
 
   reportContent.innerHTML = `
     ${headline(year, total, countCounties(shownRows))}
+    <div class="chart-grid">
+      ${breakdownChart(shownGroups, groupLabel)}
+      ${participationChart(total)}
+    </div>
     <p class="report-footnote">"Attended" means the family came to at least one session in the program year.</p>
   `
 }
@@ -451,6 +570,16 @@ async function startReportsTab(): Promise<void> {
         </label>
 
         <label class="toolbar-field">
+          <span>Break down by</span>
+          <select id="report-group">
+            <option value="county">County</option>
+            <option value="status">Family status</option>
+          </select>
+        </label>
+
+        <span class="toolbar-divider" aria-hidden="true"></span>
+
+        <label class="toolbar-field">
           <span>County</span>
           <select id="report-county">
             <option value="all">All counties</option>
@@ -478,6 +607,7 @@ async function startReportsTab(): Promise<void> {
 
   // update the report when any dropdown changes
   document.querySelector<HTMLSelectElement>('#report-year')!.addEventListener('change', showFamiliesServed)
+  document.querySelector<HTMLSelectElement>('#report-group')!.addEventListener('change', showFamiliesServed)
   document.querySelector<HTMLSelectElement>('#report-county')!.addEventListener('change', showFamiliesServed)
   document.querySelector<HTMLSelectElement>('#report-status')!.addEventListener('change', showFamiliesServed)
   document.querySelector<HTMLButtonElement>('#report-clear')!.addEventListener('click', clearFilters)
