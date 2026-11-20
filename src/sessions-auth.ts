@@ -1,3 +1,4 @@
+import { showDashboardNavigation } from './dashboard-navigation'
 import { supabase } from './supabase'
 
 const { data: sessionData } = await supabase.auth.getSession()
@@ -12,12 +13,14 @@ if (!sessionData.session) {
   if (
     error ||
     !activeRole ||
-    !['admin', 'staff', 'coordinator', 'parent'].includes(activeRole)
+    (activeRole !== 'admin' && activeRole !== 'staff' &&
+      activeRole !== 'coordinator' && activeRole !== 'parent')
   ) {
     await supabase.auth.signOut()
     window.location.href = '/index.html'
   } else {
-    document.querySelector<HTMLAnchorElement>('.logo-link')!.href =
-      `/${activeRole}-dashboard.html`
+    const home = `/${activeRole}-dashboard.html`
+    document.querySelector<HTMLAnchorElement>('.logo-link')!.href = home
+    showDashboardNavigation(activeRole)
   }
 }
