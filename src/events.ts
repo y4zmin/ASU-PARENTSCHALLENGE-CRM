@@ -10,6 +10,7 @@ type Session = {
   time: string
   capacity: number
   registered: number
+  rsvpEnabled: boolean
   status: string
 }
 
@@ -48,6 +49,7 @@ if (roleError || !activeRole) {
 
 const canManageSessions =
   activeRole === 'admin' || activeRole === 'staff'
+const canRegisterForSessions = !roleError && activeRole === 'parent'
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => {
@@ -73,6 +75,7 @@ async function loadSessions(): Promise<void> {
       session_date,
       start_time,
       capacity,
+      rsvp_enabled,
       status,
       session_types!sessions_session_type_id_fkey (
         name
@@ -101,6 +104,7 @@ async function loadSessions(): Promise<void> {
       time: session.start_time ?? '',
       capacity: session.capacity ?? 0,
       registered: 0,
+      rsvpEnabled: session.rsvp_enabled === true,
       status: session.status ?? 'scheduled',
     }
   })
@@ -164,6 +168,8 @@ function buildSummaryCards(): string {
 }
 
 function buildTableRows(): string {
+  const today = new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short' }).format(new Date())
+
   return sessions
     .map((session) => {
       const safeTitle = escapeHtml(session.title)
@@ -200,6 +206,17 @@ function buildTableRows(): string {
                   >
                     Edit
                   </button>
+                </td>
+              `
+              : ''
+          }
+          ${
+            canRegisterForSessions
+              ? `
+                <td>
+                  ${session.rsvpEnabled && session.status === 'scheduled' && session.date >= today
+                    ? `<button class="secondary-btn register-session-btn" type="button" data-session-id="${session.id}" aria-label="Register for ${safeTitle}">Register</button>`
+                    : ''}
                 </td>
               `
               : ''
@@ -241,7 +258,7 @@ function renderDashboard(): void {
             <th>Time</th>
             <th>Capacity</th>
             <th>Status</th>
-            ${canManageSessions ? '<th>Actions</th>' : ''}
+            ${canManageSessions || canRegisterForSessions ? '<th>Actions</th>' : ''}
           </tr>
         </thead>
         <tbody>
@@ -257,10 +274,37 @@ function renderDashboard(): void {
 
   dashboard
     .querySelector<HTMLTableSectionElement>('tbody')
-    ?.addEventListener('click', (event) => {
+    ?.addEventListener('click', async (event) => {
       const target = event.target
 
       if (!(target instanceof HTMLElement)) return
+
+      const registerButton = target.closest<HTMLButtonElement>('.register-session-btn')
+
+      if (canRegisterForSessions && registerButton) {
+        const session = sessions.find((item) => item.id === Number(registerButton.dataset.sessionId))
+        if (!session) return
+
+        registerButton.disabled = true
+        try {
+          const { data: familyIds, error } = await supabase.rpc(
+            'get_current_user_family_ids'
+          )
+
+          if (error || !Array.isArray(familyIds) || !familyIds.every(isFamilyId)) {
+            alert('We could not load your linked families. Please try again.')
+          } else if (familyIds.length === 0) {
+            alert('Your account has no linked family. Please contact Parents Challenge.')
+          } else {
+            openRegistrationForm(session, familyIds)
+          }
+        } catch {
+          alert('We could not load your linked families. Please try again.')
+        } finally {
+          registerButton.disabled = false
+        }
+        return
+      }
 
       const editButton = target.closest<HTMLButtonElement>(
         '.edit-session-btn'
@@ -275,6 +319,72 @@ function renderDashboard(): void {
         openSessionModal(session)
       }
     })
+}
+
+function isFamilyId(value: unknown): value is number | string {
+  return typeof value === 'number'
+    ? Number.isSafeInteger(value) && value > 0
+    : typeof value === 'string' && /^[1-9]\d*$/.test(value)
+}
+
+function openRegistrationForm(session: Session, familyIds: (number | string)[]): void {
+  if (document.querySelector('#registration-dialog')) return
+
+  const dialog = document.createElement('dialog')
+  dialog.id = 'registration-dialog'
+  dialog.className = 'event-modal'
+  dialog.setAttribute('aria-labelledby', 'registration-title')
+
+  const attendeeFields = [
+    ['adult_count', 'Adults'],
+    ['children_under_6_count', 'Children under 6'],
+    ['children_6_to_12_count', 'Children ages 6–12'],
+    ['children_over_12_count', 'Children over 12'],
+  ]
+
+  dialog.innerHTML = `
+    <div class="event-modal-header">
+      <h3 id="registration-title">Register for ${escapeHtml(session.title)}</h3>
+    </div>
+    <form>
+      <div class="form-grid">
+        <label>
+          Family
+          <select name="family_id" required>
+            ${familyIds.length > 1 ? '<option value="">Select your family</option>' : ''}
+            ${familyIds.map((id) => `<option value="${id}">Family ${id}</option>`).join('')}
+          </select>
+        </label>
+        ${attendeeFields.map(([name, label]) => `
+          <label>
+            ${label}
+            <input name="${name}" type="number" min="0" step="1" value="0" required>
+          </label>
+        `).join('')}
+        <label>
+          Childcare needed
+          <select name="childcare_required">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </label>
+        <label>
+          Notes (optional)
+          <textarea name="notes" rows="3"></textarea>
+        </label>
+      </div>
+      <p>Online registration is not open yet. Entries in this form are not saved.</p>
+      <div class="form-actions">
+        <button class="secondary-btn" type="button">Close</button>
+      </div>
+    </form>
+  `
+
+  dialog.querySelector('form')?.addEventListener('submit', (event) => event.preventDefault())
+  dialog.querySelector('button')?.addEventListener('click', () => dialog.close())
+  dialog.addEventListener('close', () => dialog.remove(), { once: true })
+  document.body.append(dialog)
+  dialog.showModal()
 }
 
 function openSessionModal(session?: Session): void {
