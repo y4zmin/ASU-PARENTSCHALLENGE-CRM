@@ -10,7 +10,7 @@ if (!sessionData.session) {
   )
 
   if (error || !activeRole) {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     window.location.href = '/index.html'
   } else if (activeRole !== 'parent') {
     if (activeRole === 'admin') {
@@ -20,7 +20,7 @@ if (!sessionData.session) {
     } else if (activeRole === 'coordinator') {
       window.location.href = '/coordinator-dashboard.html'
     } else {
-      await supabase.auth.signOut()
+      await supabase.auth.signOut({ scope: 'local' })
       window.location.href = '/index.html'
     }
   }

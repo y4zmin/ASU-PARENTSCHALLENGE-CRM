@@ -16,7 +16,7 @@ if (!sessionData.session) {
     (activeRole !== 'admin' && activeRole !== 'staff' &&
       activeRole !== 'coordinator' && activeRole !== 'parent')
   ) {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     window.location.href = '/index.html'
   } else {
     const home = `/${activeRole}-dashboard.html`
