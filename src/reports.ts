@@ -492,6 +492,186 @@ function participationChart(total: GroupSummary): string {
   `
 }
 
+// one row of the numbers table
+function numbersRow(group: GroupSummary, rowClass: string): string {
+  const notYet = group.families - group.attended
+
+  return `
+    <tr class="${rowClass}">
+      <td>${escapeHtml(group.name)}</td>
+      <td>${group.families}</td>
+      <td>${group.attended}</td>
+      <td>${notYet}</td>
+      <td>${percentOf(group.attended, group.families)}%</td>
+      <td>${group.parents}</td>
+      <td>${group.scholars}</td>
+    </tr>
+  `
+}
+
+// the same numbers as the chart in a table, with a Total row at the bottom
+function numbersTable(groups: GroupSummary[], total: GroupSummary, groupLabel: string): string {
+  let rows = ''
+  for (const group of groups) {
+    rows += numbersRow(group, '')
+  }
+
+  return `
+    <section class="numbers-section">
+      <h3>The numbers</h3>
+      <p>Everything in the charts above, plus parents and scholars served.</p>
+      <div class="table-wrapper">
+        <table class="attendance-table report-table">
+          <thead>
+            <tr>
+              <th>${groupLabel}</th>
+              <th>Families</th>
+              <th>Attended</th>
+              <th>Not Yet</th>
+              <th>% Attended</th>
+              <th>Parents</th>
+              <th>Scholars</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+          <tfoot>
+            ${numbersRow(total, 'report-total')}
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  `
+}
+
+// gets one cell ready for a csv file
+function csvCell(value: string | number): string {
+  let text = String(value)
+
+  // text starting with = + - or @ could run as a formula in Excel, so put a ' in front
+  if (typeof value === 'string' && /^[=+\-@]/.test(text)) {
+    text = "'" + text
+  }
+
+  // cells with commas, quotes, or new lines need quotes around them
+  if (/[",\r\n]/.test(text)) {
+    text = '"' + text.replace(/"/g, '""') + '"'
+  }
+
+  return text
+}
+
+// builds a csv file from the rows and downloads it
+function downloadCsv(fileName: string, rows: (string | number)[][]): void {
+  let csv = ''
+  for (const row of rows) {
+    const cells: string[] = []
+    for (const value of row) {
+      cells.push(csvCell(value))
+    }
+    csv += cells.join(',') + '\r\n'
+  }
+
+  // the \uFEFF at the start tells Excel the file is UTF-8, so names with accents show up right
+  const file = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(file)
+
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.append(link)
+  link.click()
+  link.remove()
+
+  // give the download a second to start before freeing the file
+  setTimeout(function () {
+    URL.revokeObjectURL(url)
+  }, 1000)
+}
+
+// closes the Export to Excel menu
+function closeExportMenu(): void {
+  document.querySelector<HTMLDetailsElement>('#export-menu')!.open = false
+}
+
+// closes the export menu when someone clicks anywhere outside it
+function handlePageClick(event: Event): void {
+  const menu = document.querySelector<HTMLDetailsElement>('#export-menu')
+  if (menu && menu.open && !menu.contains(event.target as Node)) {
+    menu.open = false
+  }
+}
+
+// downloads the breakdown on screen: one row per county (or status), plus the total
+function exportSummary(): void {
+  closeExportMenu()
+  if (shownRows.length === 0) {
+    return
+  }
+
+  const year = pickedValue('#report-year')
+  const groupBy = pickedValue('#report-group')
+
+  let groupLabel = 'County'
+  if (groupBy === 'status') {
+    groupLabel = 'Family Status'
+  }
+
+  const rows: (string | number)[][] = [
+    ['Program Year', groupLabel, 'Families', 'Attended', 'Not Yet', '% Attended', 'Parents', 'Scholars'],
+  ]
+
+  const total = getTotal(shownGroups)
+  for (const group of shownGroups.concat([total])) {
+    rows.push([
+      year,
+      group.name,
+      group.families,
+      group.attended,
+      group.families - group.attended,
+      percentOf(group.attended, group.families),
+      group.parents,
+      group.scholars,
+    ])
+  }
+
+  downloadCsv('families-served-by-' + groupBy + '-' + year + '.csv', rows)
+}
+
+// downloads every family that matches the filters, one row each
+function exportFamilyList(): void {
+  closeExportMenu()
+  if (shownRows.length === 0) {
+    return
+  }
+
+  const year = pickedValue('#report-year')
+
+  const rows: (string | number)[][] = [
+    ['Program Year', 'Family', 'County', 'Status', 'Parents', 'Scholars', 'Came to a Session'],
+  ]
+
+  for (const row of shownRows) {
+    let attended = 'No'
+    if (row.attended) {
+      attended = 'Yes'
+    }
+
+    rows.push([
+      row.programYear,
+      row.familyName,
+      row.county,
+      capitalize(row.status),
+      row.parentCount,
+      row.scholarCount,
+      attended,
+    ])
+  }
+
+  downloadCsv('families-served-list-' + year + '.csv', rows)
+}
+
 // shows the Families Served report for the picked filters
 function showFamiliesServed(): void {
   const year = pickedValue('#report-year')
@@ -511,6 +691,9 @@ function showFamiliesServed(): void {
     groupLabel = 'Status'
   }
 
+  // nothing to export when no families match
+  document.querySelector<HTMLElement>('#export-menu summary')!.classList.toggle('disabled', shownRows.length === 0)
+
   if (shownRows.length === 0) {
     reportContent.innerHTML = '<p class="empty-state">No families match these filters. Try "Clear filters".</p>'
     return
@@ -522,6 +705,7 @@ function showFamiliesServed(): void {
       ${breakdownChart(shownGroups, groupLabel)}
       ${participationChart(total)}
     </div>
+    ${numbersTable(shownGroups, total, groupLabel)}
     <p class="report-footnote">"Attended" means the family came to at least one session in the program year.</p>
   `
 }
@@ -596,6 +780,22 @@ async function startReportsTab(): Promise<void> {
 
         <button type="button" id="report-clear" class="link-button" hidden>Clear filters</button>
       </div>
+
+      <div class="toolbar-actions">
+        <details id="export-menu" class="export-menu">
+          <summary class="report-action primary">Export to Excel</summary>
+          <div class="export-options">
+            <button type="button" id="export-summary">
+              <strong>Summary</strong>
+              <span>One row per county or status, with totals</span>
+            </button>
+            <button type="button" id="export-list">
+              <strong>Family list</strong>
+              <span>Every family that matches the filters</span>
+            </button>
+          </div>
+        </details>
+      </div>
     </div>
 
     <div id="report-content" class="report-content"></div>
@@ -609,6 +809,11 @@ async function startReportsTab(): Promise<void> {
   document.querySelector<HTMLSelectElement>('#report-county')!.addEventListener('change', showFamiliesServed)
   document.querySelector<HTMLSelectElement>('#report-status')!.addEventListener('change', showFamiliesServed)
   document.querySelector<HTMLButtonElement>('#report-clear')!.addEventListener('click', clearFilters)
+
+  // export buttons
+  document.querySelector<HTMLButtonElement>('#export-summary')!.addEventListener('click', exportSummary)
+  document.querySelector<HTMLButtonElement>('#export-list')!.addEventListener('click', exportFamilyList)
+  document.addEventListener('click', handlePageClick)
 }
 
 // open/close the reports tab

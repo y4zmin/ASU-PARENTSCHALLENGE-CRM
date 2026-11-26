@@ -369,3 +369,145 @@ Tables and empty messages come from attendance.css.
     margin-top: -8px;
   }
 }
+
+
+/* toolbar: filters on the left, Export to Excel on the right */
+.report-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* dark button, same look as Print Roster */
+.report-action {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid var(--chart-attended);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--chart-attended);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.report-action.primary {
+  background: var(--chart-attended);
+  color: #fff;
+}
+
+/* Export to Excel menu */
+.export-menu {
+  position: relative;
+}
+
+.export-menu summary {
+  list-style: none;
+}
+
+.export-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.export-menu summary::after {
+  content: ' ▾';
+}
+
+/* nothing to export when no families match */
+.export-menu summary.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.export-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  width: 260px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #d5dbe3;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.export-options button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.export-options button:hover,
+.export-options button:focus-visible {
+  background: #eef1f5;
+}
+
+.export-options strong {
+  display: block;
+  color: var(--chart-attended);
+  font-size: 13px;
+}
+
+.export-options span {
+  display: block;
+  color: #5b6573;
+  font-size: 12px;
+}
+
+/* numbers table under the charts */
+.numbers-section {
+  margin-top: 24px;
+}
+
+.numbers-section h3 {
+  margin: 0;
+  color: var(--chart-attended);
+  font-size: 15px;
+}
+
+.numbers-section > p {
+  margin: 2px 0 10px;
+  color: #5b6573;
+  font-size: 12px;
+}
+
+/* Total row stands out at the bottom */
+.report-total td {
+  border-top: 2px solid var(--chart-attended);
+  font-weight: 700;
+}
+
+
+/* County a bit wider, every number column the same width, so the gaps are even */
+#reports-section .report-table {
+  table-layout: fixed;
+}
+
+#reports-section .report-table th:first-child {
+  width: 22%;
+}
+
+/* numbers centered under their headers */
+#reports-section .report-table th:not(:first-child),
+#reports-section .report-table td:not(:first-child) {
+  text-align: center;
+}
+
+/* same color for every number; the attendance table colors some columns */
+#reports-section .report-table td {
+  color: inherit;
+}
