@@ -21,7 +21,7 @@ const menus: Record<DashboardRole, MenuItem[]> = {
     ["Attendance","/staff-dashboard.html#attendance"],
     ["Parent Coordinators"],
     ["Documents","/staff-dashboard.html#documents"],
-    ["Reports & Analytics"],
+    ["Reports & Analytics","/staff-dashboard.html#reports"],
     ["Applications","/manage-applications.html"],
   ],
   coordinator: [

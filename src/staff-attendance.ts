@@ -938,7 +938,7 @@ async function startStaffAttendanceTab(): Promise<void> {
 function showStaffAttendance(show: boolean): void {
   staffSection.hidden = !show
 
-  sessionDashboard.style.display = show || window.location.hash === '#documents' ? 'none' : ''
+  sessionDashboard.style.display = show || window.location.hash === '#documents' || window.location.hash === '#reports' ? 'none' : ''
 
   // only change our own link, so other tabs keep theirs
   for (const link of navLinks) {

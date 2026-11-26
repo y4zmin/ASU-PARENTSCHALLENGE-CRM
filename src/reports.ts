@@ -11,8 +11,6 @@ const reportsSection = document.querySelector<HTMLElement>('#reports-section')!
 
 const sessionDashboard = document.querySelector<HTMLElement>('#events-dashboard')!
 
-const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a[href]')
-
 // one family in one program year, with everything the Families Served report needs
 interface FamilyReportRow {
   programYear: string
@@ -620,32 +618,15 @@ function showReports(show: boolean): void {
   if (show) {
     sessionDashboard.style.display = 'none'
   }
-
-  // only change our own link, so other tabs keep theirs
-  for (const link of navLinks) {
-    if (link.dataset.tab === 'reports') {
-      if (show) {
-        link.classList.add('active')
-      } else {
-        link.classList.remove('active')
-      }
-    }
-  }
 }
 
-// runs when nav link clicked
-function handleNavClick(event: Event): void {
-  const clickedLink = event.currentTarget as HTMLAnchorElement
-  showReports(clickedLink.dataset.tab === 'reports')
+// open the tab when the url ends with #reports
+function syncReports(): void {
+  showReports(window.location.hash === '#reports')
 }
 
-// run handleNavClick if any nav link is clicked
-for (const link of navLinks) {
-  link.addEventListener('click', handleNavClick)
-}
-
-// open tab if url ends with #reports
-showReports(window.location.hash === '#reports')
+window.addEventListener('hashchange', syncReports)
+syncReports()
 
 // load the data and fill in the tab
 startReportsTab()
