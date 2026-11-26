@@ -193,3 +193,232 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.registration-error:not(:empty) {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #b91c1c;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.session-details-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #244c68;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.session-details-btn:hover,
+.session-roster-back:hover {
+  color: #142f44;
+}
+
+.session-roster-dialog {
+  box-sizing: border-box;
+  width: min(48rem, calc(100% - 2rem));
+  max-height: min(44rem, calc(100dvh - 2rem));
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #c6d2c9;
+  border-radius: 18px;
+  background: #fff;
+  color: #273750;
+  box-shadow: 0 24px 72px rgb(20 38 56 / 30%);
+}
+
+.session-roster-dialog::backdrop {
+  background: rgb(21 34 49 / 55%);
+}
+
+.session-roster-shell {
+  display: flex;
+  max-height: min(44rem, calc(100dvh - 2rem - 2px));
+  flex-direction: column;
+}
+
+.session-roster-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem);
+  background: #edf3ef;
+  border-bottom: 1px solid #dce6df;
+  overflow-wrap: anywhere;
+}
+
+.session-roster-session {
+  margin: 0 0 0.35rem;
+  color: #49605a;
+  font-weight: 600;
+}
+
+.session-roster-header h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 1.9rem);
+  line-height: 1.2;
+}
+
+.session-roster-close {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid #c6d2c9;
+  border-radius: 50%;
+  background: #fff;
+  color: #273750;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.session-roster-nav {
+  padding: 0.85rem clamp(1rem, 4vw, 2rem);
+  border-bottom: 1px solid #e6ece8;
+  color: #4b6074;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.session-roster-back {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #244c68;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.session-roster-content {
+  min-height: 6rem;
+  padding: 1.25rem clamp(1rem, 4vw, 2rem) 1.5rem;
+  overflow: auto;
+}
+
+.session-roster-status {
+  margin: 0;
+  color: #4b6074;
+}
+
+.session-roster-status:not(:empty) {
+  margin-bottom: 0.75rem;
+}
+
+.session-roster-families,
+.session-roster-members {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.session-roster-family,
+.session-roster-members section {
+  border: 1px solid #dce6df;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8faf9;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.session-roster-family {
+  width: 100%;
+  min-height: 3.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.session-roster-family::after {
+  content: "›" / "";
+  color: #49605a;
+  font-size: 1.35rem;
+}
+
+.session-roster-family:hover,
+.session-roster-close:hover {
+  background: #e8f0eb;
+  border-color: #9db1a5;
+}
+
+.session-roster-members h3 {
+  margin: 0 0 0.65rem;
+  color: #354f54;
+  font-size: 0.95rem;
+}
+
+.session-roster-members ul,
+.session-roster-members p {
+  margin: 0;
+}
+
+.session-roster-members ul {
+  padding-left: 1.15rem;
+}
+
+.session-roster-members li + li {
+  margin-top: 0.35rem;
+}
+
+.session-roster-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.session-roster-sections button[aria-pressed="true"] {
+  background: #244c68;
+  color: #fff;
+}
+
+.session-roster-documents {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.session-roster-documents li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dce6df;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+
+.session-roster-documents li div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.session-roster-documents a {
+  color: #244c68;
+  text-underline-offset: 0.2em;
+}

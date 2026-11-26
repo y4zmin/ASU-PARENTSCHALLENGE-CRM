@@ -50,7 +50,7 @@ if (activeError || !isActive) {
   loginButton.disabled = false
   loginButton.textContent = 'Sign In'
 
-  await supabase.auth.signOut()
+  await supabase.auth.signOut({ scope: 'local' })
   return
 }
 
@@ -67,7 +67,7 @@ if (rolesError || !roles || roles.length === 0) {
   loginButton.disabled = false
   loginButton.textContent = 'Sign In'
 
-  await supabase.auth.signOut()
+  await supabase.auth.signOut({ scope: 'local' })
   return
 }
 
@@ -126,7 +126,7 @@ if (roleError || !activeRole) {
   loginButton.disabled = false
   loginButton.textContent = 'Sign In'
 
-  await supabase.auth.signOut()
+  await supabase.auth.signOut({ scope: 'local' })
   return
 }
 
@@ -145,7 +145,7 @@ if (activeRole === 'admin') {
   loginButton.disabled = false
   loginButton.textContent = 'Sign In'
 
-  await supabase.auth.signOut()
+  await supabase.auth.signOut({ scope: 'local' })
 }
 
 })

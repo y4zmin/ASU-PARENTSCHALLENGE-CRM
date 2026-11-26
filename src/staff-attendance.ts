@@ -938,10 +938,7 @@ async function startStaffAttendanceTab(): Promise<void> {
 function showStaffAttendance(show: boolean): void {
   staffSection.hidden = !show
 
-  // only hide the session dashboard here; the Home link reloads the page to bring it back
-  if (show) {
-    sessionDashboard.style.display = 'none'
-  }
+  sessionDashboard.style.display = show || window.location.hash === '#documents' ? 'none' : ''
 
   // only change our own link, so other tabs keep theirs
   for (const link of navLinks) {
@@ -955,28 +952,10 @@ function showStaffAttendance(show: boolean): void {
   }
 }
 
-// runs when nav link clicked
-function handleNavClick(event: Event): void {
-  const clickedLink = event.currentTarget as HTMLAnchorElement
-
-  if (clickedLink.dataset.tab === 'attendance') {
-    showStaffAttendance(true)
-  } else {
-    showStaffAttendance(false)
-  }
+function syncStaffAttendance(): void {
+  showStaffAttendance(window.location.hash === '#attendance')
 }
 
-// run handleNavClick if any nav link is clicked
-for (const link of navLinks) {
-  link.addEventListener('click', handleNavClick)
-}
-
-// open tab if url ends with #attendance
-if (window.location.hash === '#attendance') {
-  showStaffAttendance(true)
-} else {
-  showStaffAttendance(false)
-}
-
-// load the data and fill in the tab
+window.addEventListener('hashchange', syncStaffAttendance)
+syncStaffAttendance()
 startStaffAttendanceTab()

@@ -10,9 +10,6 @@ import { supabase } from './supabase'
 // empty box in html where the roster goes
 const rosterSection = document.querySelector<HTMLElement>('#session-roster-section')!
 
-// all links in nav bar
-const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a[href]')
-
 // one session in the dropdown
 interface SessionOption {
   id: string
@@ -293,12 +290,16 @@ function totalsRow(rows: RegistrationRow[]): string {
   `
 }
 
+let rosterRequest = 0
+
 // shows the roster table for one session
 async function showRoster(sessionId: string): Promise<void> {
+  const request = ++rosterRequest
   const rosterContent = document.querySelector<HTMLElement>('#roster-content')!
   rosterContent.innerHTML = '<p class="attendance-intro">Loading roster...</p>'
 
   const rows = await loadRoster(sessionId)
+  if (request !== rosterRequest) return
 
   if (rows === null) {
     rosterContent.innerHTML = '<p class="empty-state">Could not load this roster right now. Please try again later.</p>'
@@ -405,23 +406,10 @@ async function startRoster(): Promise<void> {
   document.querySelector<HTMLButtonElement>('#print-roster')!.addEventListener('click', printRoster)
 }
 
-// roster shows with the attendance tab
-function showRosterSection(show: boolean): void {
-  rosterSection.hidden = !show
+function syncRosterSection(): void {
+  rosterSection.hidden = window.location.hash !== '#attendance'
 }
 
-// runs when nav link clicked
-function handleNavClick(event: Event): void {
-  const clickedLink = event.currentTarget as HTMLAnchorElement
-  showRosterSection(clickedLink.dataset.tab === 'attendance')
-}
-
-for (const link of navLinks) {
-  link.addEventListener('click', handleNavClick)
-}
-
-// open with the tab if url ends with #attendance
-showRosterSection(window.location.hash === '#attendance')
-
-// load the data and fill in the roster
+window.addEventListener('hashchange', syncRosterSection)
+syncRosterSection()
 startRoster()

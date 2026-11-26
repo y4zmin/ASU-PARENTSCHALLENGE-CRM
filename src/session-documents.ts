@@ -1,8 +1,8 @@
 import './session-documents.css'
 import { supabase } from './supabase'
+import { getSessionDocumentLink, listSessionDocuments } from './session-document-storage'
 
 const documentsSection = document.querySelector<HTMLElement>('#session-documents-section')!
-const sessionDashboard = document.querySelector<HTMLElement>('#events-dashboard')!
 const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-bar a')
 
 interface SessionOption {
@@ -58,37 +58,12 @@ function renderSessionOptions(sessions: SessionOption[]): string {
 }
 
 async function loadSessionDocuments(sessionId: string): Promise<DocumentRecord[]> {
-  const bucketName = 'session-documents'
-
-  const { data, error } = await supabase.storage
-    .from(bucketName)
-    .list(sessionId, { limit: 100, offset: 0 })
-
-  if (error) {
-    console.error('Could not load session documents:', error.message)
-    return []
-  }
-
-  const records: DocumentRecord[] = []
-
-  for (const item of data ?? []) {
-    if (item.name.startsWith('.')) {
-      continue
-    }
-
-    const filePath = `${sessionId}/${item.name}`
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-      .from(bucketName)
-      .createSignedUrl(filePath, 60 * 60 * 24)
-
-    records.push({
-      name: item.name,
-      url: signedUrlError ? '#' : signedUrlData?.signedUrl ?? '#',
-      updatedAt: item.updated_at ?? new Date().toISOString(),
-    })
-  }
-
-  return records.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  const files = await listSessionDocuments(sessionId)
+  return Promise.all(files.map(async (file) => ({
+    name: file.name,
+    url: await getSessionDocumentLink(file.path).catch(() => ''),
+    updatedAt: file.updatedAt ?? '',
+  })))
 }
 
 function renderDocumentList(documents: DocumentRecord[]): string {
@@ -103,11 +78,11 @@ function renderDocumentList(documents: DocumentRecord[]): string {
           (document) => `
             <li class="document-item">
               <div>
-                <a href="${document.url}" target="_blank" rel="noreferrer">
-                  ${escapeHtml(document.name)}
-                </a>
+                ${document.url
+                  ? `<a href="${escapeHtml(document.url)}" target="_blank" rel="noreferrer">${escapeHtml(document.name)}</a>`
+                  : `${escapeHtml(document.name)} (Link unavailable)`}
               </div>
-              <small>${new Date(document.updatedAt).toLocaleString()}</small>
+              <small>${document.updatedAt ? new Date(document.updatedAt).toLocaleString() : ''}</small>
             </li>
           `
         )
@@ -116,14 +91,21 @@ function renderDocumentList(documents: DocumentRecord[]): string {
   `
 }
 
+let documentsRequest = 0
+
 async function refreshDocuments(sessionId: string): Promise<void> {
+  const request = ++documentsRequest
   const list = document.querySelector<HTMLElement>('#session-documents-list')
   if (!list) return
 
   list.innerHTML = '<p class="attendance-intro">Loading documents...</p>'
 
-  const documents = await loadSessionDocuments(sessionId)
-  list.innerHTML = renderDocumentList(documents)
+  try {
+    const documents = await loadSessionDocuments(sessionId)
+    if (request === documentsRequest) list.innerHTML = renderDocumentList(documents)
+  } catch {
+    if (request === documentsRequest) list.textContent = 'We could not load documents for this session.'
+  }
 }
 
 function setStatus(message: string, isError = false): void {
@@ -177,10 +159,12 @@ async function handleDocumentUpload(event: Event): Promise<void> {
       throw error
     }
 
+    if (!form.isConnected) return
     fileInput.value = ''
     setStatus('Document uploaded successfully.')
-    await refreshDocuments(sessionId)
+    if (sessionSelect.value === sessionId) await refreshDocuments(sessionId)
   } catch (error) {
+    if (!form.isConnected) return
     const message = error instanceof Error ? error.message : 'The document could not be uploaded.'
 
     setStatus(
@@ -249,10 +233,6 @@ async function startDocuments(): Promise<void> {
 function showDocumentsSection(show: boolean): void {
   documentsSection.hidden = !show
 
-  if (show) {
-    sessionDashboard.style.display = 'none'
-  }
-
   for (const link of navLinks) {
     if (link.dataset.tab === 'documents') {
       link.classList.toggle('active', show)
@@ -260,24 +240,13 @@ function showDocumentsSection(show: boolean): void {
   }
 }
 
-for (const link of navLinks) {
-  link.addEventListener('click', (event) => {
-    const clickedLink = event.currentTarget as HTMLAnchorElement
-
-    if (clickedLink.dataset.tab === 'documents') {
-      showDocumentsSection(true)
-      void startDocuments()
-    } else {
-      showDocumentsSection(false)
-    }
-  })
+function syncDocumentsSection(): void {
+  const show = window.location.hash === '#documents'
+  showDocumentsSection(show)
+  if (show) void startDocuments()
 }
 
-if (window.location.hash === '#documents') {
-  showDocumentsSection(true)
-  void startDocuments()
-} else {
-  showDocumentsSection(false)
-}
+window.addEventListener('hashchange', syncDocumentsSection)
+syncDocumentsSection()
 
 export {}
